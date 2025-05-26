@@ -1,2 +1,0 @@
-absences_rmse,absences_r2,pass_accuracy,pass_precision,pass_recall,exceptional_accuracy,exceptional_precision,exceptional_recall,exceptional_pr_auc
-4.341655423524866,0.12339811374528009,0.9,0.944954128440367,0.9363636363636364,0.9230769230769231,0.47368421052631576,1.0,0.8790204678362572
