@@ -1,0 +1,4 @@
+{
+  "regressor__max_depth": 3,
+  "regressor__min_samples_leaf": 5
+}
