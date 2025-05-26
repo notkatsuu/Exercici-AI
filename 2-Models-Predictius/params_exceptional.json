@@ -1,4 +1,4 @@
 {
-  "classifier__max_depth": null,
+  "classifier__max_depth": 3,
   "classifier__min_samples_leaf": 10
 }

@@ -392,7 +392,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description='PAC3 - Models predictius amb arbres de decisió'
     )
-    parser.add_argument('--data', type=str, default='portuguese_hs_students.csv',
+    parser.add_argument('--data', type=str, default='../portuguese_hs_students.csv', # Adjusted default path
                         help='Ruta al fitxer CSV amb les dades')
     parser.add_argument('--output-dir', type=str, default='.',
                         help='Directori on es guardaran els resultats')
@@ -487,15 +487,19 @@ def main() -> None:
 
     # Prepara les dades
     X_imbalanced = data.drop(columns=['G3'])
-    # Crea la variable objectiu: excepcional (G3 >= 19) segons l'enunciat
-    excepcional_threshold = 19  # Llindar estrictament definit a l'enunciat
+    # Crea la variable objectiu: excepcional (G3 >= 17) segons la nova definició
+    excepcional_threshold = 17  # Llindar modificat
     y_imbalanced = (data['G3'] >= excepcional_threshold).astype(int)
 
     # Examina la distribució de la classe "excepcional"
     class_distribution = np.bincount(y_imbalanced)
     logger.info(f"Distribució de la classe 'excepcional' (G3 >= {excepcional_threshold}): "
               f"{class_distribution}")
-    logger.info(f"Percentatge d'alumnes excepcionals: {100*class_distribution[1]/sum(class_distribution):.2f}%")
+    # Check if minority class exists before trying to access class_distribution[1]
+    if len(class_distribution) > 1:
+        logger.info(f"Percentatge d'alumnes excepcionals: {100*class_distribution[1]/sum(class_distribution):.2f}%")
+    else:
+        logger.info("La classe excepcional no té instàncies amb el nou llindar.")
 
     # Divideix les dades en entrenament i prova
     X_train_imb, X_test_imb, y_train_imb, y_test_imb = train_test_split(
