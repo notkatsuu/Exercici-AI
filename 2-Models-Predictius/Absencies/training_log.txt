@@ -1,0 +1,74 @@
+STDOUT:
+
+============================================================
+ Resum de l'Execució: Model de Predicció d'Absències
+============================================================
+  Tipus de Model: gradient_boosting
+  Dades d'Entrada: C:\Users\Usuario\Documents\Practica-3-IA\portuguese_hs_students.csv
+  Model i Paràmetres Guardats a: C:\Users\Usuario\Documents\Practica-3-IA\2-Models-Predictius\Absencies
+
+  Mètriques d'Avaluació (conjunt de test):
+    - MSE: 26.5638
+    - RMSE: 5.1540
+    - MAE: 3.8512
+    - R2: -0.1198
+    - Error under 1: 14.62%
+    - Error under 2: 33.08%
+    - Error under 5: 76.15%
+============================================================
+
+
+STDERR:
+2025-05-27 09:43:04 - INFO - Carregant dades des de: C:\Users\Usuario\Documents\Practica-3-IA\portuguese_hs_students.csv
+2025-05-27 09:43:04 - INFO - Dades carregades: 649 files, 33 columnes
+2025-05-27 09:43:04 - INFO - Estadístiques descriptives de les absències:
+2025-05-27 09:43:04 - INFO -   Min: 0
+2025-05-27 09:43:04 - INFO -   Max: 32
+2025-05-27 09:43:04 - INFO -   Mitjana: 3.66
+2025-05-27 09:43:04 - INFO -   Mediana: 2.0
+2025-05-27 09:43:04 - INFO -   Desviació estàndard: 4.64
+2025-05-27 09:43:04 - INFO - Distribució de valors d'absències:
+2025-05-27 09:43:04 - INFO -   0: 244 estudiants
+2025-05-27 09:43:04 - INFO -   1: 12 estudiants
+2025-05-27 09:43:04 - INFO -   2: 110 estudiants
+2025-05-27 09:43:04 - INFO -   3: 7 estudiants
+2025-05-27 09:43:04 - INFO -   4: 93 estudiants
+2025-05-27 09:43:04 - INFO -   5: 12 estudiants
+2025-05-27 09:43:04 - INFO -   6: 49 estudiants
+2025-05-27 09:43:04 - INFO -   7: 3 estudiants
+2025-05-27 09:43:04 - INFO -   8: 42 estudiants
+2025-05-27 09:43:04 - INFO -   9: 7 estudiants
+2025-05-27 09:43:04 - INFO -   10: 21 estudiants
+2025-05-27 09:43:04 - INFO -   11: 5 estudiants
+2025-05-27 09:43:04 - INFO -   12: 12 estudiants
+2025-05-27 09:43:04 - INFO -   13: 1 estudiants
+2025-05-27 09:43:04 - INFO -   14: 8 estudiants
+2025-05-27 09:43:04 - INFO -   15: 2 estudiants
+2025-05-27 09:43:04 - INFO -   16: 10 estudiants
+2025-05-27 09:43:04 - INFO -   18: 3 estudiants
+2025-05-27 09:43:04 - INFO -   21: 2 estudiants
+2025-05-27 09:43:04 - INFO -   22: 2 estudiants
+2025-05-27 09:43:04 - INFO -   24: 1 estudiants
+2025-05-27 09:43:04 - INFO -   26: 1 estudiants
+2025-05-27 09:43:04 - INFO -   30: 1 estudiants
+2025-05-27 09:43:04 - INFO -   32: 1 estudiants
+2025-05-27 09:43:04 - INFO - Característiques numèriques identificades: ['age', 'Medu', 'Fedu', 'traveltime', 'studytime', 'failures', 'famrel', 'freetime', 'goout', 'Dalc', 'Walc', 'health', 'G1', 'G2', 'G3']
+2025-05-27 09:43:04 - INFO - Característiques categòriques identificades: ['school', 'sex', 'address', 'famsize', 'Pstatus', 'Mjob', 'Fjob', 'reason', 'guardian', 'schoolsup', 'famsup', 'paid', 'activities', 'nursery', 'higher', 'internet', 'romantic']
+2025-05-27 09:43:04 - INFO - Preparant pipeline de preprocessament avançat
+2025-05-27 09:43:04 - INFO - Dades dividides: 519 mostres d'entrenament, 130 mostres de test
+2025-05-27 09:43:04 - INFO - Entrenant model de regressió gradient_boosting per predir absències
+2025-05-27 09:43:04 - INFO - Paràmetres carregats des de: C:\Users\Usuario\Documents\Practica-3-IA\2-Models-Predictius\Absencies\params_absencies.json
+2025-05-27 09:43:04 - INFO - S'utilitzaran els següents paràmetres: {'regressor__n_estimators': 10000, 'regressor__learning_rate': 0.06, 'regressor__max_depth': 13, 'regressor__min_samples_leaf': 1, 'regressor__subsample': 0.95}
+2025-05-27 09:43:04 - INFO - Entrenant el model amb els paràmetres especificats...
+2025-05-27 09:43:09 - INFO - Avaluant model de regressió
+2025-05-27 09:43:09 - INFO - Mètriques de regressió:
+2025-05-27 09:43:09 - INFO -   MSE: 26.5638
+2025-05-27 09:43:09 - INFO -   RMSE: 5.1540
+2025-05-27 09:43:09 - INFO -   MAE: 3.8512
+2025-05-27 09:43:09 - INFO -   R2: -0.1198
+2025-05-27 09:43:09 - INFO -   Error under 1: 14.62%
+2025-05-27 09:43:09 - INFO -   Error under 2: 33.08%
+2025-05-27 09:43:09 - INFO -   Error under 5: 76.15%
+2025-05-27 09:43:09 - INFO - Model guardat a: C:\Users\Usuario\Documents\Practica-3-IA\2-Models-Predictius\Absencies\decision_tree_absences.joblib
+2025-05-27 09:43:09 - INFO - Paràmetres guardats a: C:\Users\Usuario\Documents\Practica-3-IA\2-Models-Predictius\Absencies\params_absencies.json
+2025-05-27 09:43:09 - INFO - El model d'absències ha estat entrenat, avaluat i guardat correctament.

@@ -12,8 +12,7 @@ import argparse
 import json
 import logging
 import os
-from datetime import datetime
-from typing import Dict, List, Tuple, Union, Any
+from typing import Dict, List, Tuple, Any
 
 import joblib
 import numpy as np
@@ -40,6 +39,7 @@ logger = logging.getLogger(__name__)
 RANDOM_STATE = 42
 DEFAULT_PARAMS_PATH = os.path.join(os.path.dirname(__file__), "params_absencies.json")
 
+
 def load_data(file_path: str) -> pd.DataFrame:
     """
     Carrega les dades des d'un fitxer CSV.
@@ -51,7 +51,15 @@ def load_data(file_path: str) -> pd.DataFrame:
         DataFrame amb les dades carregades
     """
     logger.info(f"Carregant dades des de: {file_path}")
-    return pd.read_csv(file_path)
+    try:
+        return pd.read_csv(file_path)
+    except FileNotFoundError:
+        logger.error(f"El fitxer de dades no s'ha trobat a: {file_path}")
+        raise
+    except Exception as e:
+        logger.error(f"S'ha produït un error carregant les dades: {e}")
+        raise
+
 
 def load_parameters(params_path: str) -> Dict[str, Any]:
     """
@@ -64,32 +72,28 @@ def load_parameters(params_path: str) -> Dict[str, Any]:
     Returns:
         Diccionari amb els paràmetres del model
     """
+    default_params = {
+        "regressor__n_estimators": 100,
+        "regressor__learning_rate": 0.05,
+        "regressor__max_depth": 6,
+        "regressor__min_samples_leaf": 5,
+        "regressor__subsample": 0.8
+    }
     try:
         with open(params_path, 'r') as f:
             params = json.load(f)
             logger.info(f"Paràmetres carregats des de: {params_path}")
             return params
     except FileNotFoundError:
-        logger.warning(f"No s'ha trobat el fitxer de paràmetres: {params_path}")
-        logger.info("S'utilitzaran paràmetres per defecte")
-        # Paràmetres per defecte
-        return {
-            "regressor__n_estimators": 100,
-            "regressor__learning_rate": 0.05,
-            "regressor__max_depth": 6,
-            "regressor__min_samples_leaf": 5,
-            "regressor__subsample": 0.8
-        }
+        logger.warning(f"No s'ha trobat el fitxer de paràmetres: {params_path}. S'utilitzaran paràmetres per defecte.")
+        return default_params
     except json.JSONDecodeError:
-        logger.error(f"Error de format al fitxer de paràmetres: {params_path}")
-        logger.info("S'utilitzaran paràmetres per defecte")
-        return {
-            "regressor__n_estimators": 100,
-            "regressor__learning_rate": 0.05,
-            "regressor__max_depth": 6,
-            "regressor__min_samples_leaf": 5,
-            "regressor__subsample": 0.8
-        }
+        logger.error(f"Error de format al fitxer de paràmetres: {params_path}. S'utilitzaran paràmetres per defecte.")
+        return default_params
+    except Exception as e:
+        logger.error(f"S'ha produït un error carregant els paràmetres: {e}. S'utilitzaran paràmetres per defecte.")
+        return default_params
+
 
 def analyze_absences_distribution(data: pd.DataFrame) -> None:
     """
@@ -98,20 +102,25 @@ def analyze_absences_distribution(data: pd.DataFrame) -> None:
     Args:
         data: DataFrame amb les dades dels estudiants
     """
+    if 'absences' not in data.columns:
+        logger.error("La columna 'absences' no es troba a les dades.")
+        return
+
     absences = data['absences']
 
-    logger.info(f"Estadístiques descriptives de les absències:")
-    logger.info(f"Min: {absences.min()}")
-    logger.info(f"Max: {absences.max()}")
-    logger.info(f"Mitjana: {absences.mean():.2f}")
-    logger.info(f"Mediana: {absences.median()}")
-    logger.info(f"Desviació estàndard: {absences.std():.2f}")
+    logger.info("Estadístiques descriptives de les absències:")
+    logger.info(f"  Min: {absences.min()}")
+    logger.info(f"  Max: {absences.max()}")
+    logger.info(f"  Mitjana: {absences.mean():.2f}")
+    logger.info(f"  Mediana: {absences.median()}")
+    logger.info(f"  Desviació estàndard: {absences.std():.2f}")
 
     # Distribució de valors
     value_counts = absences.value_counts().sort_index()
-    logger.info(f"Distribució de valors d'absències:")
+    logger.info("Distribució de valors d'absències:")
     for value, count in value_counts.items():
         logger.info(f"  {value}: {count} estudiants")
+
 
 def prepare_pipeline(numerical_features: List[str],
                      categorical_features: List[str]) -> ColumnTransformer:
@@ -127,33 +136,33 @@ def prepare_pipeline(numerical_features: List[str],
     """
     logger.info("Preparant pipeline de preprocessament avançat")
 
-    # Preprocessament per a característiques numèriques amb escalat
     numerical_transformer = Pipeline(steps=[
         ('imputer', SimpleImputer(strategy='median')),
-        ('scaler', StandardScaler())  # Afegim escalat per millorar rendiment
+        ('scaler', StandardScaler())
     ])
 
-    # Preprocessament per a característiques categòriques amb one-hot encoding
     categorical_transformer = Pipeline(steps=[
         ('imputer', SimpleImputer(strategy='most_frequent')),
         ('onehot', OneHotEncoder(handle_unknown='ignore', sparse_output=False))
     ])
 
-    # Combina tots els preprocessadors en un ColumnTransformer
     preprocessor = ColumnTransformer(
         transformers=[
             ('num', numerical_transformer, numerical_features),
             ('cat', categorical_transformer, categorical_features)
-        ])
+        ],
+        remainder='passthrough'  # Keep other columns if any, though not expected here
+    )
 
     return preprocessor
 
+
 def train_regression_model(X: pd.DataFrame, y: pd.Series,
-                          preprocessor: ColumnTransformer,
-                          model_type: str = 'gradient_boosting',
-                          param_file: str = DEFAULT_PARAMS_PATH) -> Tuple[Pipeline, Dict[str, Any]]:
+                           preprocessor: ColumnTransformer,
+                           model_type: str = 'gradient_boosting',
+                           param_file: str = DEFAULT_PARAMS_PATH) -> Tuple[Pipeline, Dict[str, Any]]:
     """
-    Entrena un model de regressió amb validació creuada i cerca en quadrícula.
+    Entrena un model de regressió.
     Els paràmetres es llegeixen d'un fitxer JSON.
 
     Args:
@@ -164,44 +173,44 @@ def train_regression_model(X: pd.DataFrame, y: pd.Series,
         param_file: Fitxer de paràmetres per al model
 
     Returns:
-        Tuple de (model entrenat, millors hiperparàmetres)
+        Tuple de (model entrenat, paràmetres utilitzats)
     """
     logger.info(f"Entrenant model de regressió {model_type} per predir absències")
 
-    # Carreguem els paràmetres des del fitxer o utilitzem els per defecte
     model_params = load_parameters(param_file)
     logger.info(f"S'utilitzaran els següents paràmetres: {model_params}")
 
-    # Selecció del model segons el tipus especificat
+    regressor_params = {k.replace('regressor__', ''): v
+                        for k, v in model_params.items() if k.startswith('regressor__')}
+
     if model_type == 'decision_tree':
-        regressor = DecisionTreeRegressor(random_state=RANDOM_STATE)
+        regressor = DecisionTreeRegressor(random_state=RANDOM_STATE, **regressor_params)
     elif model_type == 'random_forest':
-        regressor = RandomForestRegressor(random_state=RANDOM_STATE)
+        regressor = RandomForestRegressor(random_state=RANDOM_STATE, **regressor_params)
     elif model_type == 'gradient_boosting':
-        # Creem el model amb els paràmetres carregats
-        # Primer filtrem només els paràmetres que comencen per 'regressor__'
-        gb_params = {k.replace('regressor__', ''): v for k, v in model_params.items()
-                    if k.startswith('regressor__')}
-        regressor = GradientBoostingRegressor(random_state=RANDOM_STATE, **gb_params)
+        regressor = GradientBoostingRegressor(random_state=RANDOM_STATE, **regressor_params)
     else:
+        logger.error(f"Tipus de model no suportat: {model_type}")
         raise ValueError(f"Tipus de model no suportat: {model_type}")
 
-    # Crea el pipeline complet amb selecció de característiques
     model = Pipeline(steps=[
         ('preprocessor', preprocessor),
-        ('feature_selection', SelectFromModel(estimator=RandomForestRegressor(n_estimators=100, random_state=RANDOM_STATE))),
+        ('feature_selection', SelectFromModel(
+            estimator=RandomForestRegressor(n_estimators=100, random_state=RANDOM_STATE),
+            threshold=-np.inf, # Keep all features by default, can be tuned
+            max_features=None # Can be set to a number or fraction
+        )),
         ('regressor', regressor)
     ])
 
-    # Entrenament del model directament amb els paràmetres carregats
     logger.info("Entrenant el model amb els paràmetres especificats...")
     model.fit(X, y)
 
-    # Retornem el model i els paràmetres utilitzats
     return model, model_params
 
+
 def evaluate_regression_model(model: Pipeline, X_test: pd.DataFrame,
-                             y_test: pd.Series) -> Dict[str, float]:
+                              y_test: pd.Series) -> Dict[str, float]:
     """
     Avalua un model de regressió i torna les mètriques.
 
@@ -215,138 +224,164 @@ def evaluate_regression_model(model: Pipeline, X_test: pd.DataFrame,
     """
     logger.info("Avaluant model de regressió")
 
-    # Prediccions
     y_pred = model.predict(X_test)
 
-    # Càlcul de mètriques
     mse = mean_squared_error(y_test, y_pred)
     rmse = np.sqrt(mse)
     mae = mean_absolute_error(y_test, y_pred)
     r2 = r2_score(y_test, y_pred)
 
-    # Calculem percentatge d'errors absoluts per rang
     abs_errors = np.abs(y_test - y_pred)
-    error_under_1 = np.mean(abs_errors < 1) * 100
-    error_under_2 = np.mean(abs_errors < 2) * 100
-    error_under_5 = np.mean(abs_errors < 5) * 100
+    error_metrics = {
+        'error_under_1_pct': np.mean(abs_errors < 1) * 100,
+        'error_under_2_pct': np.mean(abs_errors < 2) * 100,
+        'error_under_5_pct': np.mean(abs_errors < 5) * 100
+    }
 
     metrics = {
         'mse': mse,
         'rmse': rmse,
         'mae': mae,
         'r2': r2,
-        'error_under_1': error_under_1,
-        'error_under_2': error_under_2,
-        'error_under_5': error_under_5
+        **error_metrics  # Merge error percentage metrics
     }
 
-    logger.info(f"Mètriques de regressió:")
-    logger.info(f"MSE: {mse:.4f}")
-    logger.info(f"RMSE: {rmse:.4f}")
-    logger.info(f"MAE: {mae:.4f}")
-    logger.info(f"R²: {r2:.4f}")
-    logger.info(f"Prediccions amb error < 1: {error_under_1:.2f}%")
-    logger.info(f"Prediccions amb error < 2: {error_under_2:.2f}%")
-    logger.info(f"Prediccions amb error < 5: {error_under_5:.2f}%")
+    logger.info("Mètriques de regressió:")
+    for key, value in metrics.items():
+        if "pct" in key:
+            logger.info(f"  {key.replace('_pct', '').replace('_', ' ').capitalize()}: {value:.2f}%")
+        else:
+            logger.info(f"  {key.upper()}: {value:.4f}")
 
     return metrics
 
+
 def save_model_and_params(model: Pipeline, params: Dict[str, Any],
-                         model_path: str, params_path: str) -> None:
+                          output_dir: str, model_filename: str = "decision_tree_absences.joblib",
+                          params_filename: str = "params_absencies.json") -> None:
     """
-    Guarda el model i els seus millors paràmetres en fitxers.
+    Guarda el model i els seus paràmetres en fitxers.
 
     Args:
         model: Model entrenat a guardar
-        params: Millors paràmetres del model
-        model_path: Ruta per guardar el model
-        params_path: Ruta per guardar els paràmetres
+        params: Paràmetres del model
+        output_dir: Directori on es guardaran els fitxers
+        model_filename: Nom del fitxer del model
+        params_filename: Nom del fitxer dels paràmetres
     """
-    # Guarda el model
+    os.makedirs(output_dir, exist_ok=True) # Ensure output directory exists
+
+    model_path = os.path.join(output_dir, model_filename)
     joblib.dump(model, model_path)
     logger.info(f"Model guardat a: {model_path}")
 
-    # Guarda els paràmetres
-    with open(params_path, 'w') as f:
-        json.dump(params, f, indent=2)
-    logger.info(f"Paràmetres guardats a: {params_path}")
+    params_path = os.path.join(output_dir, params_filename)
+    try:
+        with open(params_path, 'w') as f:
+            json.dump(params, f, indent=4) # Improved formatting with indent=4
+        logger.info(f"Paràmetres guardats a: {params_path}")
+    except Exception as e:
+        logger.error(f"No s'han pogut guardar els paràmetres a {params_path}: {e}")
+
+
+def define_feature_types(data: pd.DataFrame, target_column: str = 'absences') -> Tuple[List[str], List[str]]:
+    """
+    Identifica columnes numèriques i categòriques, excloent la columna objectiu.
+    """
+    if target_column not in data.columns:
+        logger.error(f"La columna objectiu '{target_column}' no existeix a les dades.")
+        raise ValueError(f"La columna objectiu '{target_column}' no existeix a les dades.")
+
+    numerical_cols = data.select_dtypes(include=np.number).columns.tolist()
+    numerical_cols = [col for col in numerical_cols if col != target_column]
+
+    categorical_cols = data.select_dtypes(include=['object', 'category']).columns.tolist()
+    # Ensure target is not in categorical if it was accidentally object type
+    categorical_cols = [col for col in categorical_cols if col != target_column]
+
+
+    logger.info(f"Característiques numèriques identificades: {numerical_cols}")
+    logger.info(f"Característiques categòriques identificades: {categorical_cols}")
+    return numerical_cols, categorical_cols
+
 
 def main() -> None:
     """Funció principal que coordina tot el flux de treball."""
 
-    # Configuració dels arguments de línia d'ordres
     parser = argparse.ArgumentParser(
-        description='Model de predicció d\'absències'
+        description="Model de predicció d'absències amb entrenament i avaluació.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter # Shows default values in help
     )
     parser.add_argument('--data', type=str, default='../../portuguese_hs_students.csv',
-                        help='Ruta al fitxer CSV amb les dades')
-    parser.add_argument('--output-dir', type=str, default='.',
-                        help='Directori on es guardaran els resultats')
+                        help='Ruta al fitxer CSV amb les dades dels estudiants.')
+    parser.add_argument('--output-dir', type=str, default=os.path.join(os.path.dirname(__file__), 'output_model'),
+                        help="Directori on es guardaran el model entrenat i els paràmetres.")
     parser.add_argument('--model-type', type=str,
                         choices=['decision_tree', 'random_forest', 'gradient_boosting'],
                         default='gradient_boosting',
-                        help='Tipus de model a entrenar')
+                        help='Tipus de regressor a entrenar.')
     parser.add_argument('--params', type=str, default=DEFAULT_PARAMS_PATH,
-                        help='Ruta al fitxer JSON amb paràmetres personalitzats')
+                        help="Ruta al fitxer JSON amb paràmetres personalitzats per al model. "
+                             "Si no es troba, s'utilitzaran els paràmetres per defecte.")
 
     args = parser.parse_args()
 
-    # Carrega les dades
-    data = load_data(args.data)
-    logger.info(f"Dades carregades: {data.shape[0]} files, {data.shape[1]} columnes")
+    try:
+        data = load_data(args.data)
+        logger.info(f"Dades carregades: {data.shape[0]} files, {data.shape[1]} columnes")
 
-    # Analitzem la distribució de la variable absències
-    analyze_absences_distribution(data)
+        analyze_absences_distribution(data)
 
-    # Identificació de característiques numèriques i categòriques
-    # Exclou 'absences' que serà la variable objectiu
-    numerical_cols = data.select_dtypes(include=['int64', 'float64']).columns.tolist()
-    numerical_cols = [col for col in numerical_cols if col != 'absences']
+        numerical_cols, categorical_cols = define_feature_types(data, target_column='absences')
 
-    categorical_cols = data.select_dtypes(include=['object']).columns.tolist()
+        if not numerical_cols and not categorical_cols:
+            logger.error("No s'han trobat característiques per entrenar el model. Revisa les dades.")
+            return
 
-    logger.info(f"Característiques numèriques: {len(numerical_cols)}")
-    logger.info(f"Característiques categòriques: {len(categorical_cols)}")
+        preprocessor = prepare_pipeline(numerical_cols, categorical_cols)
 
-    # Prepara el preprocessament
-    preprocessor = prepare_pipeline(numerical_cols, categorical_cols)
+        X = data.drop(columns=['absences'])
+        y = data['absences']
 
-    # Prepara les dades
-    X = data.drop(columns=['absences'])
-    y = data['absences']
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.2, random_state=RANDOM_STATE, stratify=pd.cut(y, bins=5, labels=False, include_lowest=True) if y.nunique() > 5 else None
+        )
+        # Note: Stratification is tricky for regression. Using simple binning for demonstration.
+        # For highly skewed data or specific regression needs, custom stratification might be better.
+        # If target has few unique values, stratification might fail or be meaningless.
 
-    # Dividim les dades en conjunts d'entrenament i test
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=RANDOM_STATE
-    )
+        logger.info(f"Dades dividides: {X_train.shape[0]} mostres d'entrenament, {X_test.shape[0]} mostres de test")
 
-    logger.info(f"Dades dividides: {X_train.shape[0]} mostres d'entrenament, {X_test.shape[0]} mostres de test")
+        model, used_params = train_regression_model(
+            X_train, y_train, preprocessor, model_type=args.model_type, param_file=args.params
+        )
 
-    # Entrena el model amb els paràmetres del fitxer
-    model, params = train_regression_model(
-        X_train, y_train, preprocessor, model_type=args.model_type, param_file=args.params
-    )
+        metrics = evaluate_regression_model(model, X_test, y_test)
 
-    # Avalua el model
-    metrics = evaluate_regression_model(model, X_test, y_test)
+        save_model_and_params(model, used_params, args.output_dir)
 
-    # Guarda el model i els paràmetres
-    model_path = os.path.join(args.output_dir, "decision_tree_absences.joblib")
-    params_path = os.path.join(args.output_dir, "params_absencies.json")
-    save_model_and_params(model, params, model_path, params_path)
+        logger.info("El model d'absències ha estat entrenat, avaluat i guardat correctament.")
+        print("\n" + "="*60)
+        print(" Resum de l'Execució: Model de Predicció d'Absències")
+        print("="*60)
+        print(f"  Tipus de Model: {args.model_type}")
+        print(f"  Dades d'Entrada: {os.path.abspath(args.data)}")
+        print(f"  Model i Paràmetres Guardats a: {os.path.abspath(args.output_dir)}")
+        print("\n  Mètriques d'Avaluació (conjunt de test):")
+        for key, value in metrics.items():
+            if "pct" in key:
+                print(f"    - {key.replace('_pct', '').replace('_', ' ').capitalize()}: {value:.2f}%")
+            else:
+                print(f"    - {key.upper()}: {value:.4f}")
+        print("="*60)
 
-    # Mostra un resum final
-    logger.info("El model d'absències ha estat entrenat i avaluat correctament.")
-    print("\n" + "="*50)
-    print("Model de predicció d'absències")
-    print("="*50)
-    print(f"Model i resultats guardats a: {args.output_dir}")
-    print("\nUsa la següent comanda per veure les opcions:")
-    print(f"python {os.path.basename(__file__)} --help")
-    print("\nFitxers generats:")
-    print(f"- {os.path.basename(model_path)} - Model de regressió per a absències")
-    print(f"- {os.path.basename(params_path)} - Paràmetres del model")
-    print("="*50)
+    except FileNotFoundError:
+        logger.error(f"Error: El fitxer de dades no s'ha trobat a la ruta especificada: {args.data}")
+    except ValueError as ve:
+        logger.error(f"Error de valor durant l'execució: {ve}")
+    except Exception as e:
+        logger.error(f"S'ha produït un error inesperat durant l'execució: {e}", exc_info=True)
+        # exc_info=True in logger.error will print traceback for unexpected errors.
 
 
 if __name__ == "__main__":

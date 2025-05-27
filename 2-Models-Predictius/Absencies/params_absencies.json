@@ -1,7 +1,7 @@
 {
-  "regressor__n_estimators": 20000,
-  "regressor__learning_rate": 0.01,
-  "regressor__max_depth": 7,
-  "regressor__min_samples_leaf": 2,
-  "regressor__subsample": 0.85
+    "regressor__n_estimators": 10000,
+    "regressor__learning_rate": 0.06,
+    "regressor__max_depth": 13,
+    "regressor__min_samples_leaf": 1,
+    "regressor__subsample": 0.95
 }

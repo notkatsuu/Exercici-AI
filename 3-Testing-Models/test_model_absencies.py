@@ -2,13 +2,11 @@ import joblib
 import pandas as pd
 import numpy as np
 import tkinter as tk
-from tkinter import ttk, messagebox, filedialog
+from tkinter import ttk, messagebox  # Removed filedialog
 import json
 import os
 import sys
 import subprocess
-
-
 
 # Columnes esperades pel model d'absències (totes menys 'absences' que és el target, però G3 sí s'inclou com a feature)
 EXPECTED_COLUMNS_ABSENCES = [
@@ -176,7 +174,7 @@ class AbsencesPredictorApp:
         num_cols_ui = 3 # Number of columns for input fields in the UI
         current_row, current_col_idx = 0, 0
 
-        for i, col_name in enumerate(EXPECTED_COLUMNS_ABSENCES):
+        for col_name in EXPECTED_COLUMNS_ABSENCES:  # Removed unused 'i' from enumerate
             definition = COLUMN_DEFINITIONS_ABSENCES.get(col_name)
             if not definition:
                 continue
