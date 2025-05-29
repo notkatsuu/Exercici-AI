@@ -1,0 +1,55 @@
+STDOUT:
+
+============================================================
+ Resum de l'Execució: Model de Predicció d'Aprovats
+============================================================
+  Dades d'Entrada: C:\Users\pauca\Documents\GitHub\Practica-3-IA\portuguese_hs_students.csv
+  Model i Paràmetres Guardats a: C:\Users\pauca\Documents\GitHub\Practica-3-IA\2-Models-Predictius\Aprovat
+
+  Avaluació del model al conjunt de test:
+    - Exactitud (accuracy): 0.9154
+    - Precisió (precision): 0.9561
+    - Sensibilitat (recall): 0.9478
+    - Puntuació F1: 0.9520
+============================================================
+
+
+STDERR:
+2025-05-29 21:56:11 - INFO - Iniciant el procés d'entrenament del model de predicció d'aprovats...
+2025-05-29 21:56:11 - INFO - Fitxer de dades: C:\Users\pauca\Documents\GitHub\Practica-3-IA\portuguese_hs_students.csv
+2025-05-29 21:56:11 - INFO - Directori de sortida: C:\Users\pauca\Documents\GitHub\Practica-3-IA\2-Models-Predictius\Aprovat
+2025-05-29 21:56:11 - INFO - Fitxer de paràmetres: C:\Users\pauca\Documents\GitHub\Practica-3-IA\2-Models-Predictius\Aprovat\params_aprovat.json
+2025-05-29 21:56:11 - INFO - Carregant dades des de: C:\Users\pauca\Documents\GitHub\Practica-3-IA\portuguese_hs_students.csv
+2025-05-29 21:56:11 - INFO - Analitzant distribució de classes (aprovats/suspesos)...
+2025-05-29 21:56:11 - INFO - Total d'estudiants: 649
+2025-05-29 21:56:11 - INFO - Estudiants aprovats: 549 (84.59%)
+2025-05-29 21:56:11 - INFO - Estudiants suspesos: 100 (15.41%)
+2025-05-29 21:56:11 - INFO - Preparant dades per a l'entrenament del model...
+2025-05-29 21:56:11 - INFO - Dades preparades: 649 files, 32 columnes
+2025-05-29 21:56:11 - INFO - Característiques categòriques: ['school', 'sex', 'address', 'famsize', 'Pstatus', 'Mjob', 'Fjob', 'reason', 'guardian', 'schoolsup', 'famsup', 'paid', 'activities', 'nursery', 'higher', 'internet', 'romantic']
+2025-05-29 21:56:11 - INFO - Paràmetres carregats des de: C:\Users\pauca\Documents\GitHub\Practica-3-IA\2-Models-Predictius\Aprovat\params_aprovat.json
+2025-05-29 21:56:11 - INFO - Entrenant model de classificació...
+2025-05-29 21:56:11 - INFO - Creant pipeline de preprocessament...
+2025-05-29 21:56:11 - INFO - Conjunt d'entrenament: 519 mostres, Conjunt de test: 130 mostres
+2025-05-29 21:56:11 - INFO - Distribució de classes en entrenament: [ 85 434]
+2025-05-29 21:56:11 - INFO - Distribució de classes en test: [ 15 115]
+2025-05-29 21:56:11 - INFO - Paràmetre n_estimators establert a 1000
+2025-05-29 21:56:11 - INFO - Paràmetre learning_rate establert a 0.1
+2025-05-29 21:56:11 - INFO - Paràmetre max_depth establert a 7
+2025-05-29 21:56:11 - INFO - Paràmetre min_samples_leaf establert a 5
+2025-05-29 21:56:11 - INFO - Paràmetre subsample establert a 0.8
+2025-05-29 21:56:11 - INFO - Iniciant entrenament del model...
+2025-05-29 21:56:15 - INFO - Model entrenat correctament
+2025-05-29 21:56:15 - INFO - Rendiment del model:
+2025-05-29 21:56:15 - INFO - Exactitud (accuracy): 0.9154
+2025-05-29 21:56:15 - INFO - Precisió (precision): 0.9561
+2025-05-29 21:56:15 - INFO - Sensibilitat (recall): 0.9478
+2025-05-29 21:56:15 - INFO - Puntuació F1 (F1 score): 0.9520
+2025-05-29 21:56:15 - INFO - Matriu de confusió:
+2025-05-29 21:56:15 - INFO - Verdaders positius (TP): 109
+2025-05-29 21:56:15 - INFO - Falsos positius (FP): 5
+2025-05-29 21:56:15 - INFO - Verdaders negatius (TN): 10
+2025-05-29 21:56:15 - INFO - Falsos negatius (FN): 6
+2025-05-29 21:56:15 - INFO - Model desat a C:\Users\pauca\Documents\GitHub\Practica-3-IA\2-Models-Predictius\Aprovat\decision_tree_aprovat.joblib
+2025-05-29 21:56:15 - INFO - Corba de precisió-record desada a C:\Users\pauca\Documents\GitHub\Practica-3-IA\2-Models-Predictius\Aprovat\pr_curves.png
+2025-05-29 21:56:15 - INFO - Procés d'entrenament completat correctament.
