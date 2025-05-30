@@ -1,0 +1,14 @@
+STDOUT:
+
+
+STDERR:
+2025-05-30 13:44:23 - INFO - Paràmetres carregats des de: C:\Users\Usuario\Documents\Practica-3-IA\2-Models-Predictius\Excepcionals\params_excepcionals.json
+2025-05-30 13:44:23 - INFO - Carregant dades des de: C:\Users\Usuario\Documents\Practica-3-IA\portuguese_hs_students.csv
+2025-05-30 13:44:23 - INFO - Analitzant distribució d'alumnes excepcionals (G3>=18)...
+2025-05-30 13:44:23 - INFO - Total alumnes: 649
+2025-05-30 13:44:23 - INFO - Excepcionals: 17 (2.62%)
+2025-05-30 13:44:23 - INFO - No excepcionals: 632 (97.38%)
+2025-05-30 13:44:27 - INFO - Accuracy: 0.9538
+2025-05-30 13:44:27 - INFO - Precision: 0.6667
+2025-05-30 13:44:27 - INFO - Recall: 0.5000
+2025-05-30 13:44:27 - INFO - F1: 0.5714

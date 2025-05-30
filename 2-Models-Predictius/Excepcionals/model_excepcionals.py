@@ -128,7 +128,13 @@ def main():
     parser.add_argument("--params", default=DEFAULT_PARAMS_PATH)
     args = parser.parse_args()
     params = load_parameters(args.params)
-    orig_threshold = params.get('threshold', 19)
+    # Ensure threshold is integer
+    raw_threshold = params.get('threshold', 19)
+    try:
+        orig_threshold = int(raw_threshold)
+    except (TypeError, ValueError):
+        logger.warning(f"Invalid threshold value '{raw_threshold}', defaulting to 19")
+        orig_threshold = 19
     if orig_threshold > 18:
         logger.warning(f"Threshold {orig_threshold} too high; capping to 18")
     threshold = min(orig_threshold, 18)

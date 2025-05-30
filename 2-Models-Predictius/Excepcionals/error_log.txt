@@ -1,0 +1,13 @@
+STDOUT:
+
+
+STDERR:
+2025-05-30 13:43:12 - INFO - Paràmetres carregats des de: C:\Users\Usuario\Documents\Practica-3-IA\2-Models-Predictius\Excepcionals\params_excepcionals.json
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Practica-3-IA\2-Models-Predictius\Excepcionals\model_excepcionals.py", line 141, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\Usuario\Documents\Practica-3-IA\2-Models-Predictius\Excepcionals\model_excepcionals.py", line 132, in main
+    if orig_threshold > 18:
+       ^^^^^^^^^^^^^^^^^^^
+TypeError: '>' not supported between instances of 'str' and 'int'

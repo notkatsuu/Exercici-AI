@@ -12,6 +12,9 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, roc_curve, auc
 import seaborn as sns
 from sklearn.model_selection import train_test_split, cross_val_score
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Columnes esperades pel model d'absències (totes menys 'absences' que és el target, però G3 sí s'inclou com a feature)
 EXPECTED_COLUMNS_ABSENCES = [
@@ -30,6 +33,8 @@ EXPECTED_COLUMNS_APROVAT = [
     'romantic', 'famrel', 'freetime', 'goout', 'Dalc', 'Walc', 'health',
     'G1', 'G2', 'absences'
 ]
+
+EXPECTED_COLUMNS_EXCEPCIONALS = EXPECTED_COLUMNS_APROVAT
 
 # Diccionari amb prompts, tipus, opcions vàlides (opcional) i valors per defecte per a cada columna
 # Aquest diccionari serveix per a ambdós models, ja que tenen les mateixes columnes
@@ -86,6 +91,14 @@ DEFAULT_MODEL_PARAMS_APROVAT = {
     "classifier__subsample": 0.8
 }
 
+DEFAULT_MODEL_PARAMS_EXCEPCIONALS = {
+    "classifier__n_estimators": 1000,
+    "classifier__learning_rate": 0.1,
+    "classifier__max_depth": 7,
+    "classifier__min_samples_leaf": 5,
+    "classifier__subsample": 0.8
+}
+
 class PredictorApp:
     def __init__(self, master):
         self.master = master
@@ -121,16 +134,18 @@ class PredictorApp:
         # Variable per seguir el model actiu
         self.model_type = tk.StringVar(value="absencies")
 
-        # Rutes als fitxers dels models (camins absoluts per evitar ambigüitats)
+        # Rutes als fitxers dels models (camins absoluts per evitar ambdiguïtats)
         self.model_paths = {
             "absencies": os.path.abspath("../2-Models-Predictius/Absencies/decision_tree_absences.joblib"),
             "aprovat": os.path.abspath("../2-Models-Predictius/Aprovat/decision_tree_aprovat.joblib")
         }
+        self.model_paths["excepcionals"] = os.path.abspath("../2-Models-Predictius/Excepcionals/decision_tree_excepcionals.joblib")
 
         self.params_paths = {
             "absencies": os.path.abspath("../2-Models-Predictius/Absencies/params_absencies.json"),
             "aprovat": os.path.abspath("../2-Models-Predictius/Aprovat/params_aprovat.json")
         }
+        self.params_paths["excepcionals"] = os.path.abspath("../2-Models-Predictius/Excepcionals/params_excepcionals.json")
 
         # Crear un notebook amb pestanyes
         self.notebook = ttk.Notebook(master)
@@ -156,6 +171,12 @@ class PredictorApp:
                                              variable=self.model_type, value="aprovat",
                                              command=self.change_model)
         self.radio_aprovat.grid(row=0, column=2, padx=10, pady=5)
+
+        # Botó de ràdio per a excepcionals
+        self.radio_excepcionals = ttk.Radiobutton(self.selector_frame, text="Predicció d'Excepcionals",
+                                                 variable=self.model_type, value="excepcionals",
+                                                 command=self.change_model)
+        self.radio_excepcionals.grid(row=0, column=3, padx=10, pady=5)
 
         # Pestanya per a la predicció
         self.prediction_tab = ttk.Frame(self.notebook)
@@ -287,6 +308,52 @@ class PredictorApp:
 
         ttk.Button(main_frame, text="Tancar", command=help_window.destroy).pack(pady=20)
 
+    def show_excepcionals_evaluation_help(self):
+        """Mostra un diàleg d'ajuda amb les explicacions de les mètriques d'avaluació del model d'excepcionals."""
+        help_window = tk.Toplevel(self.master)
+        help_window.title("Ajuda Avaluació Model Excepcionals")
+        help_window.geometry("600x400")
+        help_window.configure(bg='#2B2B2B')
+        help_window.transient(self.master)
+        help_window.grab_set()
+
+        main_frame = ttk.Frame(help_window, padding=10)
+        main_frame.pack(fill=tk.BOTH, expand=True)
+
+        ttk.Label(main_frame, text="Interpretació de les Mètriques d'Avaluació (Classificació Excepcionals)", font=("Arial", 12, "bold")).pack(pady=(0,10))
+
+        # Explicació Matriu de Confusió
+        ttk.Label(main_frame, text="Matriu de Confusió:", font=("Arial", 10, "bold")).pack(anchor=tk.W, pady=(10,2))
+        confusion_explanation_text = (
+            "• Cel·la Superior Esquerra (Veritables Negatius - TN): Nombre d'estudiants normals classificats correctament com NO excepcionals.\n"
+            "• Cel·la Superior Dreta (Falsos Positius - FP): Nombre d'estudiants normals classificats incorrectament com excepcionals.\n"
+            "• Cel·la Inferior Esquerra (Falsos Negatius - FN): Nombre d'estudiants excepcionals classificats incorrectament com NO excepcionals.\n"
+            "• Cel·la Inferior Dreta (Veritables Positius - TP): Nombre d'estudiants excepcionals classificats correctament com excepcionals."
+        )
+        ttk.Label(main_frame, text=confusion_explanation_text, justify=tk.LEFT, wraplength=550, font=("Arial", 9)).pack(anchor=tk.W, padx=10)
+
+        # Explicació Corba ROC i AUC
+        ttk.Label(main_frame, text="Corba ROC (Receiver Operating Characteristic) i AUC (Area Under the Curve):", font=("Arial", 10, "bold")).pack(anchor=tk.W, pady=(15,2))
+        roc_auc_value_text = "N/A (El model no proporciona probabilitats)"
+        if hasattr(self, 'last_roc_auc_value') and self.last_roc_auc_value is not None:
+            roc_auc = self.last_roc_auc_value
+            roc_quality = ("molt bo" if roc_auc > 0.9 else
+                           "bo" if roc_auc > 0.8 else
+                           "acceptable" if roc_auc > 0.7 else
+                           "millorable")
+            roc_auc_value_text = f"{roc_auc:.2f} (rendiment {roc_quality})"
+
+        roc_explanation_text = (
+            "• La corba ROC il·lustra la capacitat del model per distingir estudiants excepcionals.\n"
+            "• Eix X (Taxa de Falsos Positius - FPR): Proporció d'estudiants normals classificats com excepcionals.\n"
+            "• Eix Y (Taxa de Veritables Positius - TPR): Proporció d'estudiants excepcionals classificats correctament.\n"
+            "• Línia Diagonal (vermella discontínua): Classificador aleatori (AUC = 0.5). Com més lluny cap a l'angle superior esquerre, millor el model.\n"
+            f"• AUC (Àrea Sota la Corba): Rendiment global. Valor actual: {roc_auc_value_text}."
+        )
+        ttk.Label(main_frame, text=roc_explanation_text, justify=tk.LEFT, wraplength=550, font=("Arial", 9)).pack(anchor=tk.W, padx=10)
+
+        ttk.Button(main_frame, text="Tancar", command=help_window.destroy).pack(pady=20)
+
     def change_model(self):
         """Canvia el model actiu segons la selecció de l'usuari."""
         self.load_active_model()
@@ -300,9 +367,12 @@ class PredictorApp:
         if model_type == "absencies":
             self.master.title("Predicció d'Absències")
             self.predict_button.config(text="Predir Absències")
-        else:
+        elif model_type == "aprovat":
             self.master.title("Predicció d'Aprovats")
             self.predict_button.config(text="Predir Aprovat")
+        elif model_type == "excepcionals":
+            self.master.title("Predicció d'Excepcionals")
+            self.predict_button.config(text="Predir Excepcionals")
 
         # Actualitzar paràmetres al tab de configuració
         self.create_param_config_ui(self.config_tab)
@@ -333,7 +403,12 @@ class PredictorApp:
 
     def load_params(self, model_type):
         """Carrega els paràmetres del model indicat."""
-        default_params = DEFAULT_MODEL_PARAMS_ABSENCES if model_type == "absencies" else DEFAULT_MODEL_PARAMS_APROVAT
+        if model_type == "absencies":
+            default_params = DEFAULT_MODEL_PARAMS_ABSENCES
+        elif model_type == "aprovat":
+            default_params = DEFAULT_MODEL_PARAMS_APROVAT
+        else:
+            default_params = DEFAULT_MODEL_PARAMS_EXCEPCIONALS
         params_path = self.params_paths[model_type]
 
         try:
@@ -354,7 +429,12 @@ class PredictorApp:
     def create_input_fields(self, parent):
         """Crea els camps d'entrada segons el model seleccionat."""
         model_type = self.model_type.get()
-        expected_columns = EXPECTED_COLUMNS_ABSENCES if model_type == "absencies" else EXPECTED_COLUMNS_APROVAT
+        if model_type == "absencies":
+            expected_columns = EXPECTED_COLUMNS_ABSENCES
+        elif model_type == "aprovat":
+            expected_columns = EXPECTED_COLUMNS_APROVAT
+        else:
+            expected_columns = EXPECTED_COLUMNS_EXCEPCIONALS
 
         # Main frame for all inputs
         main_frame = ttk.Frame(parent)
@@ -406,9 +486,12 @@ class PredictorApp:
         if model_type == "absencies":
             title_text = "Configuració dels Paràmetres del Model d'Absències"
             desc_text = "Modifica els paràmetres per millorar la precisió del model de predicció d'absències."
-        else:
+        elif model_type == "aprovat":
             title_text = "Configuració dels Paràmetres del Model d'Aprovats"
             desc_text = "Modifica els paràmetres per millorar la precisió del model de predicció d'aprovats."
+        else:
+            title_text = "Configuració dels Paràmetres del Model d'Excepcionals"
+            desc_text = "Modifica els paràmetres per millorar la precisió del model de predicció d'excepcionals."
 
         ttk.Label(param_frame, text=title_text, font=("Arial", 12, "bold")).grid(row=0, column=0, columnspan=2, pady=10, sticky=tk.W)
         ttk.Label(param_frame, text=desc_text).grid(row=1, column=0, columnspan=2, pady=(0, 15), sticky=tk.W)
@@ -596,13 +679,20 @@ class PredictorApp:
                 main_abs_eval_frame.grid_rowconfigure(1, weight=0)  # Fila per al botó
                 main_abs_eval_frame.grid_columnconfigure(0, weight=1) # Columna única
 
-            else:  # Model d'aprovats
+            elif model_type == "aprovat" or model_type == "excepcionals":
                 # Crear la variable objectiu (aprovat si G3 >= 10)
-                data['aprovat'] = (data['G3'] >= 10).astype(int)
-
-                # No utilitzar G3 com a característica perquè és la base del que volem predir
-                X = data.drop(columns=['aprovat', 'G3'])
-                y = data['aprovat']
+                raw_threshold = self.params.get('threshold', 18)
+                try:
+                    threshold = int(raw_threshold)
+                except (TypeError, ValueError):
+                    logger.warning(f"Invalid threshold '{raw_threshold}', defaulting to 18")
+                    threshold = 18
+                if model_type == 'aprovat':
+                    data['target'] = (data['G3'] >= 10).astype(int)
+                else:
+                    data['target'] = (data['G3'] >= threshold).astype(int)
+                X = data.drop(columns=['target', 'G3'])
+                y = data['target']
 
                 # Dividir les dades en conjunts d'entrenament i test
                 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -650,8 +740,9 @@ class PredictorApp:
                 main_eval_frame.grid_columnconfigure(1, weight=1)
 
                 # Botó d'Ajuda
-                help_button = ttk.Button(main_eval_frame, text="Ajuda Interpretació", command=self.show_aprovat_evaluation_help)
-                help_button.grid(row=1, column=0, columnspan=2, pady=10, padx=5, sticky="ew") # Changed to row 1, columnspan 2
+                help_fn = self.show_aprovat_evaluation_help if model_type=='aprovat' else self.show_excepcionals_evaluation_help
+                help_button = ttk.Button(main_eval_frame, text="Ajuda Interpretació", command=help_fn)
+                help_button.grid(row=1, column=0, columnspan=2, pady=10, padx=5, sticky="ew")
 
                 # Configuració del frame de la matriu de confusió
                 confusion_fig = plt.figure(figsize=(4.5, 4.5))  # Adjusted size
@@ -774,9 +865,12 @@ class PredictorApp:
             if model_type == "absencies":
                 model_script_path = os.path.abspath(f"{model_dir}/Absencies/model_absencies.py")
                 output_dir = os.path.dirname(self.model_paths["absencies"])
-            else:
+            elif model_type == "aprovat":
                 model_script_path = os.path.abspath(f"{model_dir}/Aprovat/model_aprovat.py")
                 output_dir = os.path.dirname(self.model_paths["aprovat"])
+            else:
+                model_script_path = os.path.abspath(f"{model_dir}/Excepcionals/model_excepcionals.py")
+                output_dir = os.path.dirname(self.model_paths["excepcionals"])
 
             # Busquem el fitxer csv a la carpeta arrel del projecte
             data_path = self.data_path

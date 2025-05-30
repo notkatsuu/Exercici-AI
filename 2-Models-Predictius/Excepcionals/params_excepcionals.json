@@ -1,9 +1,8 @@
 {
-    "classifier__n_estimators": 1000,
-    "classifier__learning_rate": 0.1,
-    "classifier__max_depth": 7,
-    "classifier__min_samples_leaf": 5,
-    "classifier__subsample": 0.8,
-    "threshold": 18
+  "classifier__n_estimators": 1000,
+  "classifier__learning_rate": 0.1,
+  "classifier__max_depth": 7,
+  "classifier__min_samples_leaf": 5,
+  "classifier__subsample": 0.8,
+  "threshold": "18"
 }
-
