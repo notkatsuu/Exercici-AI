@@ -483,7 +483,7 @@ class PredictorApp:
             ttk.Button(evaluation_frame, text="Executar Avaluació", command=self.run_model_evaluation).pack(pady=10)
 
             # Marc per a les mètriques
-            self.metrics_frame = ttk.LabelFrame(evaluation_frame, text="Mètriques d'Avaluació")
+            self.metrics_frame = ttk.Frame(evaluation_frame)
             self.metrics_frame.pack(fill=tk.X, expand=False, pady=10)
 
             # Espai per al gràfic
