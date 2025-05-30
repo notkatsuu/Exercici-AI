@@ -192,6 +192,101 @@ class PredictorApp:
         # Actualitzar el títol i contingut segons el model seleccionat
         self.update_ui_for_model()
 
+    def show_absencies_evaluation_help(self):
+        """Mostra un diàleg d'ajuda amb les explicacions de les mètriques d'avaluació del model d'absències."""
+        help_window = tk.Toplevel(self.master)
+        help_window.title("Ajuda Avaluació Model Absències")
+        help_window.geometry("650x550") # Adjusted size for more content
+        help_window.configure(bg='#2B2B2B')
+        help_window.transient(self.master)
+        help_window.grab_set()
+
+        main_frame = ttk.Frame(help_window, padding=10)
+        main_frame.pack(fill=tk.BOTH, expand=True)
+
+        ttk.Label(main_frame, text="Interpretació de les Mètriques i Gràfics d'Avaluació (Regressió)", font=("Arial", 12, "bold")).pack(pady=(0,10))
+
+        # Explicació Mètriques de Regressió
+        ttk.Label(main_frame, text="Mètriques d'Avaluació (Model d'Absències):", font=("Arial", 10, "bold")).pack(anchor=tk.W, pady=(10,2))
+        metrics_explanation_text = (
+            "• Error Absolut Mitjà (MAE): És la mitjana de les diferències absolutes entre els valors predits i els reals. "
+            "Un MAE més baix indica un millor ajust del model. És fàcil d'interpretar ja que està en les mateixes unitats que la variable objectiu (absències).\n\n"
+            "• Error Quadràtic Mitjà (MSE): És la mitjana de les diferències quadràtiques entre els valors predits i els reals. "
+            "Penalitza més els errors grans que el MAE. Un MSE més baix és millor. Les unitats són el quadrat de les unitats de la variable objectiu.\n\n"
+            "• Arrel de l'Error Quadràtic Mitjà (RMSE): És l'arrel quadrada del MSE. "
+            "Similar al MAE, està en les mateixes unitats que la variable objectiu, fent-lo més interpretable que el MSE. Un RMSE més baix és millor.\n\n"
+            "• Coeficient de Determinació (R²): Indica la proporció de la variància en la variable dependent que és previsible a partir de les variables independents. "
+            "Un valor d'R² proper a 1 indica que el model explica una gran part de la variabilitat de les dades. Un valor proper a 0 indica que el model no explica bé la variabilitat. "
+            "Pot ser negatiu si el model és pitjor que un model horitzontal simple.\n\n"
+            "• RMSE Validació Creuada (5-fold): És el RMSE mitjà obtingut mitjançant validació creuada (en aquest cas, amb 5 particions). "
+            "Proporciona una estimació més robusta del rendiment del model en dades no vistes, ajudant a detectar el sobreajust (overfitting). "
+            "El valor ± indica la desviació estàndard dels RMSE obtinguts en cada partició."
+        )
+        ttk.Label(main_frame, text=metrics_explanation_text, justify=tk.LEFT, wraplength=600, font=("Arial", 9)).pack(anchor=tk.W, padx=10)
+
+        # Explicació Gràfics de Regressió
+        ttk.Label(main_frame, text="Interpretació dels Gràfics:", font=("Arial", 10, "bold")).pack(anchor=tk.W, pady=(15,2))
+        graphs_explanation_text = (
+            "1. Prediccions vs. Valors Reals:\n"
+            "   • Aquest gràfic de dispersió mostra els valors reals (eix X) contra els valors predits pel model (eix Y).\n"
+            "   • Idealment, els punts haurien d'alinear-se al llarg de la línia diagonal vermella (y=x), indicant que les prediccions són iguals als valors reals.\n"
+            "   • La dispersió dels punts al voltant d'aquesta línia dóna una idea visual de la precisió del model.\n\n"
+            "2. Distribució de l'Error:\n"
+            "   • Aquest histograma mostra la distribució dels errors de predicció (valors reals - valors predits).\n"
+            "   • Idealment, la distribució hauria d'estar centrada en zero (línia vertical vermella), indicant que el model no té un biaix sistemàtic (no sobreestima ni subestima consistentment).\n"
+            "   • Una distribució simètrica i estreta al voltant de zero és desitjable."
+        )
+        ttk.Label(main_frame, text=graphs_explanation_text, justify=tk.LEFT, wraplength=600, font=("Arial", 9)).pack(anchor=tk.W, padx=10)
+
+        ttk.Button(main_frame, text="Tancar", command=help_window.destroy).pack(pady=20)
+
+    def show_aprovat_evaluation_help(self):
+        """Mostra un diàleg d'ajuda amb les explicacions de les mètriques d'avaluació del model d'aprovats."""
+        help_window = tk.Toplevel(self.master)
+        help_window.title("Ajuda Avaluació Model Aprovats")
+        help_window.geometry("600x400")
+        help_window.configure(bg='#2B2B2B')
+        help_window.transient(self.master)
+        help_window.grab_set()
+
+        main_frame = ttk.Frame(help_window, padding=10)
+        main_frame.pack(fill=tk.BOTH, expand=True)
+
+        ttk.Label(main_frame, text="Interpretació de les Mètriques d'Avaluació", font=("Arial", 12, "bold")).pack(pady=(0,10))
+
+        # Explicació Matriu de Confusió
+        ttk.Label(main_frame, text="Matriu de Confusió:", font=("Arial", 10, "bold")).pack(anchor=tk.W, pady=(10,2))
+        confusion_explanation_text = (
+            "• Cel·la Superior Esquerra (Veritables Negatius - TN): Nombre d'estudiants que NO van aprovar i el model va predir correctament que NO aprovarien.\n"
+            "• Cel·la Superior Dreta (Falsos Positius - FP): Nombre d'estudiants que NO van aprovar, però el model va predir incorrectament que SÍ aprovarien.\n"
+            "• Cel·la Inferior Esquerra (Falsos Negatius - FN): Nombre d'estudiants que SÍ van aprovar, però el model va predir incorrectament que NO aprovarien.\n"
+            "• Cel·la Inferior Dreta (Veritables Positius - TP): Nombre d'estudiants que SÍ van aprovar i el model va predir correctament que SÍ aprovarien."
+        )
+        ttk.Label(main_frame, text=confusion_explanation_text, justify=tk.LEFT, wraplength=550, font=("Arial", 9)).pack(anchor=tk.W, padx=10)
+
+        # Explicació Corba ROC i AUC
+        ttk.Label(main_frame, text="Corba ROC (Receiver Operating Characteristic) i AUC (Area Under the Curve):", font=("Arial", 10, "bold")).pack(anchor=tk.W, pady=(15,2))
+        
+        roc_auc_value_text = "N/A (El model no proporciona probabilitats)"
+        if hasattr(self, 'last_roc_auc_value') and self.last_roc_auc_value is not None:
+            roc_auc = self.last_roc_auc_value
+            roc_quality = ("molt bo" if roc_auc > 0.9 else
+                           "bo" if roc_auc > 0.8 else
+                           "acceptable" if roc_auc > 0.7 else
+                           "millorable")
+            roc_auc_value_text = f"{roc_auc:.2f} (rendiment {roc_quality})"
+
+        roc_explanation_text = (
+            "• La corba ROC il·lustra la capacitat de diagnòstic d'un classificador binari a mesura que es varia el llindar de discriminació.\n"
+            "• Eix X (Taxa de Falsos Positius - FPR): Proporció de negatius reals incorrectament classificats com a positius.\n"
+            "• Eix Y (Taxa de Veritables Positius - TPR o Sensibilitat): Proporció de positius reals correctament classificats.\n"
+            "• Línia Diagonal (vermella discontínua): Representa un classificador aleatori (AUC = 0.5). Com més lluny estigui la corba d'aquesta línia (cap a l'angle superior esquerre), millor serà el model.\n"
+            f"• AUC (Àrea Sota la Corba): Mesura el rendiment global del classificador. Un valor d'1.0 indica un classificador perfecte, mentre que 0.5 indica un rendiment aleatori. El valor actual de l'AUC és: {roc_auc_value_text}."
+        )
+        ttk.Label(main_frame, text=roc_explanation_text, justify=tk.LEFT, wraplength=550, font=("Arial", 9)).pack(anchor=tk.W, padx=10)
+
+        ttk.Button(main_frame, text="Tancar", command=help_window.destroy).pack(pady=20)
+
     def change_model(self):
         """Canvia el model actiu segons la selecció de l'usuari."""
         self.load_active_model()
@@ -417,6 +512,7 @@ class PredictorApp:
 
             model_type = self.model_type.get()
             data = pd.read_csv(self.data_path)
+            self.last_roc_auc_value = None # Reset AUC value for help dialog
 
             # Preparar les dades segons el model
             if model_type == "absencies":
@@ -448,8 +544,12 @@ class PredictorApp:
                     ("RMSE Validació Creuada (5-fold)", f"{cv_rmse.mean():.4f} ± {cv_rmse.std():.4f}")
                 ]
 
+                # Crear frame principal per als gràfics i el botó d'ajuda
+                main_abs_eval_frame = ttk.Frame(self.plot_frame)
+                main_abs_eval_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+
                 # Crear gràfic
-                fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
+                fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4.5))
                 fig.set_facecolor('#2B2B2B')
 
                 # Gràfic 1: Valors reals vs. prediccions
@@ -482,10 +582,19 @@ class PredictorApp:
                     ttk.Label(self.metrics_frame, text=f"{metric}:").grid(row=i, column=0, sticky=tk.W, padx=5, pady=3)
                     ttk.Label(self.metrics_frame, text=value, font=("Arial", 9, "bold")).grid(row=i, column=1, sticky=tk.W, padx=5, pady=3)
 
-                # Mostrar el gràfic a Tkinter
-                canvas = FigureCanvasTkAgg(fig, master=self.plot_frame)
+                # Mostrar el gràfic a Tkinter, directament dins de main_abs_eval_frame usant grid
+                canvas = FigureCanvasTkAgg(fig, master=main_abs_eval_frame)
                 canvas.draw()
-                canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+                canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+
+                # Botó d'Ajuda per al model d'absències, usant grid
+                abs_help_button = ttk.Button(main_abs_eval_frame, text="Ajuda Interpretació", command=self.show_absencies_evaluation_help)
+                abs_help_button.grid(row=1, column=0, pady=10, padx=5, sticky="ew")
+
+                # Configurar pesos de les files i columnes per a main_abs_eval_frame
+                main_abs_eval_frame.grid_rowconfigure(0, weight=1)  # Fila per al gràfic
+                main_abs_eval_frame.grid_rowconfigure(1, weight=0)  # Fila per al botó
+                main_abs_eval_frame.grid_columnconfigure(0, weight=1) # Columna única
 
             else:  # Model d'aprovats
                 # Crear la variable objectiu (aprovat si G3 >= 10)
@@ -528,69 +637,54 @@ class PredictorApp:
                     ttk.Label(self.metrics_frame, text=f"{metric}:").grid(row=i, column=0, sticky=tk.W, padx=5, pady=3)
                     ttk.Label(self.metrics_frame, text=value, font=("Arial", 9, "bold")).grid(row=i, column=1, sticky=tk.W, padx=5, pady=3)
 
-                # Frame per al primer gràfic (matriu de confusió) i la seva explicació
-                confusion_frame = ttk.Frame(main_eval_frame)
-                confusion_frame.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+                # Frame per al primer gràfic (matriu de confusió)
+                confusion_graph_frame = ttk.Frame(main_eval_frame) # Renamed from confusion_frame
+                confusion_graph_frame.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
 
-                # Frame per al segon gràfic (corba ROC) i la seva explicació
-                roc_frame = ttk.Frame(main_eval_frame)
-                roc_frame.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
+                # Frame per al segon gràfic (corba ROC)
+                roc_graph_frame = ttk.Frame(main_eval_frame) # Renamed from roc_frame
+                roc_graph_frame.grid(row=0, column=1, sticky="nsew", padx=5, pady=5) # Changed to column 1
 
-                main_eval_frame.grid_rowconfigure(0, weight=1)
-                main_eval_frame.grid_rowconfigure(1, weight=1)
+                main_eval_frame.grid_rowconfigure(0, weight=1) # Row for graphs
                 main_eval_frame.grid_columnconfigure(0, weight=1)
+                main_eval_frame.grid_columnconfigure(1, weight=1)
+
+                # Botó d'Ajuda
+                help_button = ttk.Button(main_eval_frame, text="Ajuda Interpretació", command=self.show_aprovat_evaluation_help)
+                help_button.grid(row=1, column=0, columnspan=2, pady=10, padx=5, sticky="ew") # Changed to row 1, columnspan 2
 
                 # Configuració del frame de la matriu de confusió
-                confusion_fig = plt.figure(figsize=(3.5, 3.5))  # Gràfic més petit
+                confusion_fig = plt.figure(figsize=(4.5, 4.5))  # Adjusted size
                 confusion_fig.set_facecolor('#2B2B2B')
                 conf_ax = confusion_fig.add_subplot(111)
 
                 # Dibuixar la matriu de confusió
                 cm = confusion_matrix(y_test, y_pred)
                 sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", ax=conf_ax)
-                conf_ax.set_xlabel('Predit', color='white', fontsize=8)  # Text més petit
-                conf_ax.set_ylabel('Real', color='white', fontsize=8)  # Text més petit
-                conf_ax.set_title('Matriu de Confusió', color='white', fontsize=10)  # Títol més petit
-                conf_ax.tick_params(colors='white', labelsize=8)  # Text més petit
+                conf_ax.set_xlabel('Predit', color='white', fontsize=9)
+                conf_ax.set_ylabel('Real', color='white', fontsize=9)
+                conf_ax.set_title('Matriu de Confusió', color='white', fontsize=11)
+                conf_ax.tick_params(colors='white', labelsize=9)
                 conf_ax.set_facecolor('#383838')
 
-                # Añadir etiquetas a los ejes para clarificar la matriz de confusión
                 conf_ax.set_xticks([0.5, 1.5])
-                conf_ax.set_xticklabels(['No (0)', 'Sí (1)'])  # Etiquetes més breus
+                conf_ax.set_xticklabels(['No (0)', 'Sí (1)'])
                 conf_ax.set_yticks([0.5, 1.5])
-                conf_ax.set_yticklabels(['No (0)', 'Sí (1)'])  # Etiquetes més breus
+                conf_ax.set_yticklabels(['No (0)', 'Sí (1)'])
 
                 for spine in conf_ax.spines.values():
                     spine.set_color('white')
 
-                confusion_fig.tight_layout()  # Optimitzar espai
-
-                # Dividir el frame de la matriu de confusió en dues columnes
-                confusion_frame.grid_columnconfigure(0, weight=1)  # Gràfic
-                confusion_frame.grid_columnconfigure(1, weight=2)  # Explicació
+                confusion_fig.tight_layout()
 
                 # Canvas per a la matriu de confusió
-                confusion_canvas = FigureCanvasTkAgg(confusion_fig, master=confusion_frame)
+                confusion_canvas = FigureCanvasTkAgg(confusion_fig, master=confusion_graph_frame)
                 confusion_canvas.draw()
-                confusion_canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
-
-                # Explicació de la matriu de confusió
-                confusion_explanation_frame = ttk.Frame(confusion_frame)
-                confusion_explanation_frame.grid(row=0, column=1, sticky="nsew", padx=5, pady=5)
-
-                ttk.Label(confusion_explanation_frame, text="Interpretació:",
-                         font=("Arial", 9, "bold")).pack(anchor=tk.W, pady=(0, 3))
-
-                explanation_text = ("• Sup. esq. (TN): V. Negatius - No aprovat predit correctament\n"
-                               "• Sup. dret. (FP): F. Positius - Aprovat predit incorrectament\n"
-                               "• Inf. esq. (FN): F. Negatius - No aprovat predit incorrectament\n"
-                               "• Inf. dret. (TP): V. Positius - Aprovat predit correctament")
-
-                ttk.Label(confusion_explanation_frame, text=explanation_text, justify=tk.LEFT, font=("Arial", 8)).pack(anchor=tk.W)
+                confusion_canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
                 # Configuració del frame de la corba ROC
                 if hasattr(self.model, "predict_proba"):
-                    roc_fig = plt.figure(figsize=(3.5, 3.5))  # Gràfic més petit
+                    roc_fig = plt.figure(figsize=(4.5, 4.5))  # Adjusted size
                     roc_fig.set_facecolor('#2B2B2B')
                     roc_ax = roc_fig.add_subplot(111)
 
@@ -598,55 +692,31 @@ class PredictorApp:
                     y_scores = self.model.predict_proba(X_test)[:, 1]
                     fpr, tpr, _ = roc_curve(y_test, y_scores)
                     roc_auc = auc(fpr, tpr)
+                    self.last_roc_auc_value = roc_auc # Store for help dialog
 
                     roc_ax.plot(fpr, tpr, color='#5DA5DA', lw=2, label=f'AUC = {roc_auc:.2f}')
-                    roc_ax.plot([0, 1], [0, 1], 'r--', label='Base (50%)')  # Etiqueta més breu
-                    roc_ax.set_xlim([0.0, 1.0])
-                    roc_ax.set_ylim([0.0, 1.05])
-                    roc_ax.set_xlabel('Taxa FP', color='white', fontsize=8)  # Text més breu i petit
-                    roc_ax.set_ylabel('Taxa VP', color='white', fontsize=8)  # Text més breu i petit
-                    roc_ax.set_title('Corba ROC', color='white', fontsize=10)  # Títol més petit
-                    roc_ax.legend(loc="lower right", fontsize=8)  # Llegenda més petita
-                    roc_ax.tick_params(colors='white', labelsize=8)  # Text més petit
+                    roc_ax.plot([0, 1], [0, 1], 'r--', label='Base (50%)')
+                    roc_ax.set_xlim((0.0, 1.0)) # Changed to tuple
+                    roc_ax.set_ylim((0.0, 1.05)) # Changed to tuple
+                    roc_ax.set_xlabel('Taxa FP', color='white', fontsize=9)
+                    roc_ax.set_ylabel('Taxa VP', color='white', fontsize=9)
+                    roc_ax.set_title('Corba ROC', color='white', fontsize=11)
+                    roc_ax.legend(loc="lower right", fontsize=9)
+                    roc_ax.tick_params(colors='white', labelsize=9)
                     roc_ax.set_facecolor('#383838')
 
                     for spine in roc_ax.spines.values():
                         spine.set_color('white')
 
-                    roc_fig.tight_layout()  # Optimitzar espai
-
-                    # Dividir el frame de la corba ROC en dues columnes
-                    roc_frame.grid_columnconfigure(0, weight=1)  # Gràfic
-                    roc_frame.grid_columnconfigure(1, weight=2)  # Explicació
+                    roc_fig.tight_layout()
 
                     # Canvas per a la corba ROC
-                    roc_canvas = FigureCanvasTkAgg(roc_fig, master=roc_frame)
+                    roc_canvas = FigureCanvasTkAgg(roc_fig, master=roc_graph_frame)
                     roc_canvas.draw()
-                    roc_canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
-
-                    # Explicació de la corba ROC
-                    roc_explanation_frame = ttk.Frame(roc_frame)
-                    roc_explanation_frame.grid(row=0, column=1, sticky="nsew", padx=5, pady=5)
-
-                    ttk.Label(roc_explanation_frame, text="Interpretació:",
-                             font=("Arial", 9, "bold")).pack(anchor=tk.W, pady=(0, 3))
-
-                    roc_quality = ("molt bo" if roc_auc > 0.9 else
-                                  "bo" if roc_auc > 0.8 else
-                                  "acceptable" if roc_auc > 0.7 else
-                                  "millorable")
-
-                    roc_text = ("• Mostra rendiment del classificador a diferents llindars\n"
-                           "• Eix X: Taxa de Falsos Positius\n"
-                           "• Eix Y: Taxa de Verdaders Positius (Recall)\n"
-                           "• Línia vermella: classificador aleatori (50%)\n"
-                           "• Millor rendiment: corba cap a l'angle superior esquerre\n"
-                           f"• AUC = {roc_auc:.2f}: rendiment {roc_quality}")
-
-                    ttk.Label(roc_explanation_frame, text=roc_text, justify=tk.LEFT, font=("Arial", 8)).pack(anchor=tk.W)
+                    roc_canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
                 else:
-                    ttk.Label(roc_frame, text="No s'ha pogut generar la corba ROC.\nEl model no proporciona probabilitats.").pack(pady=20)
+                    ttk.Label(roc_graph_frame, text="No s'ha pogut generar la corba ROC.\nEl model no proporciona probabilitats.").pack(pady=20)
 
         except Exception as e:
             messagebox.showerror("Error", f"S'ha produït un error durant l'avaluació: {e}")
@@ -731,9 +801,6 @@ class PredictorApp:
             progress_window.geometry("400x150")
             progress_window.configure(bg='#2B2B2B')
 
-            progress_window.transient(self.master)
-            progress_window.grab_set()
-
             ttk.Label(progress_window, text=f"S'està entrenant el model {model_type} amb els nous paràmetres...",
                      font=("Arial", 10)).pack(pady=20)
 
@@ -743,34 +810,37 @@ class PredictorApp:
 
             # Funció per cancel·lar el procés
             def cancel_training():
-                if hasattr(self, 'process') and self.process:
+                if hasattr(self, 'process') and self.process and self.process.poll() is None:
                     try:
                         self.process_cancelled = True
-                        # En Windows usem taskkill per assegurar-nos que s'eliminen els processos fills també
                         if sys.platform == 'win32':
                             subprocess.run(["taskkill", "/F", "/T", "/PID", str(self.process.pid)],
-                                          stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+                                          check=False, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
                         else:
                             self.process.terminate()
+                            try:
+                                self.process.wait(timeout=3) # Donar un temps prudencial
+                            except subprocess.TimeoutExpired:
+                                self.process.kill() # Si no termina, matar-lo
+                        print("Procés d'entrenament terminat/cancel·lat per l'usuari.")
                     except Exception as e:
                         print(f"Error al cancel·lar el procés: {e}")
-                progress_window.destroy()
+                
+                if progress_window.winfo_exists():
+                    progress_window.destroy()
 
             # Botó per cancel·lar
             cancel_button = ttk.Button(progress_window, text="Cancel·lar",
                                       command=cancel_training)
             cancel_button.pack(pady=10)
 
-            # Protocol per gestionar el tancament de la finestra
             progress_window.protocol("WM_DELETE_WINDOW", cancel_training)
+            progress_window.update_idletasks()  # Ensure window contents are drawn
+            self.master.update()  # Update the main UI to show the progress window
 
-            # Actualitzar la UI abans d'iniciar el procés
-            self.master.update()
-
-            try:
-                # Executar el procés en mode no bloquejant
+            try: # Inner try for Popen
                 self.process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
-                                              bufsize=1, universal_newlines=True)
+                                                bufsize=1, universal_newlines=True)
 
                 # Comprovar periòdicament si el procés ha acabat
                 def check_process():
@@ -812,11 +882,12 @@ class PredictorApp:
                 # Iniciar la comprovació
                 self.master.after(100, check_process)
 
-            except Exception as e:
+            except Exception as e: # This is the except for the Popen try (inner try)
                 if hasattr(progress_window, 'winfo_exists') and progress_window.winfo_exists():
                     progress_window.destroy()
                 messagebox.showerror("Error", f"No s'ha pogut iniciar l'entrenament: {e}")
-
+        # This is the except block for the outer try in retrain_model.
+        # Ensuring it's correctly placed and indented.
         except Exception as e:
             messagebox.showerror("Error", f"Error general: {e}")
             import traceback
