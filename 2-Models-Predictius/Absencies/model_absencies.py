@@ -24,7 +24,6 @@ from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.tree import DecisionTreeRegressor
 
 # Configuració del logger
 logging.basicConfig(
@@ -102,7 +101,6 @@ def prepare_pipeline(numerical_features: List[str],
 
 def train_regression_model(X: pd.DataFrame, y: pd.Series,
                            preprocessor: ColumnTransformer,
-                           model_type: str = 'gradient_boosting',
                            param_file: str = DEFAULT_PARAMS_PATH) -> Tuple[Pipeline, Dict[str, Any]]:
 
  
@@ -110,15 +108,8 @@ def train_regression_model(X: pd.DataFrame, y: pd.Series,
     regressor_params = {k.replace('regressor__', ''): v
                         for k, v in model_params.items() if k.startswith('regressor__')}
 
-    if model_type == 'decision_tree':
-        regressor = DecisionTreeRegressor(random_state=RANDOM_STATE, **regressor_params)
-    elif model_type == 'random_forest':
-        regressor = RandomForestRegressor(random_state=RANDOM_STATE, **regressor_params)
-    elif model_type == 'gradient_boosting':
-        regressor = GradientBoostingRegressor(random_state=RANDOM_STATE, **regressor_params)
-    else:
-        logger.error(f"Tipus de model no suportat: {model_type}")
-        raise ValueError(f"Tipus de model no suportat: {model_type}")
+    # Always use GradientBoostingRegressor, removing other algorithm options
+    regressor = GradientBoostingRegressor(random_state=RANDOM_STATE, **regressor_params)
 
     model = Pipeline(steps=[
         ('preprocessor', preprocessor),
@@ -179,7 +170,7 @@ def main() -> None:
     parser.add_argument('--output-dir', type=str, default=os.path.join(os.path.dirname(__file__), 'output_model'),
                         help="Directori on es guardaran el model entrenat i els paràmetres.")
     parser.add_argument('--model-type', type=str,
-                        choices=['decision_tree', 'random_forest', 'gradient_boosting'],
+                        choices=['gradient_boosting'],
                         default='gradient_boosting',
                         help='Tipus de regressor a entrenar.')
     parser.add_argument('--params', type=str, default=DEFAULT_PARAMS_PATH,
@@ -207,7 +198,7 @@ def main() -> None:
         )
     
         model, used_params = train_regression_model(
-            X_train, y_train, preprocessor, model_type=args.model_type, param_file=args.params
+            X_train, y_train, preprocessor, param_file=args.params
         )
 
         save_model_and_params(model, used_params, args.output_dir)

@@ -2,6 +2,6 @@ STDOUT:
 
 
 STDERR:
-2025-06-03 08:52:44 - INFO - Preparant pipeline de preprocessament avançat
-2025-06-03 08:52:44 - INFO - Entrenant el model amb els paràmetres especificats...
-2025-06-03 08:52:50 - INFO - Model guardat a: C:\Users\Usuario\Documents\Practica-3-IA\2-Models-Predictius\Absencies\decision_tree_absences.joblib
+2025-06-03 09:59:26 - INFO - Preparant pipeline de preprocessament avançat
+2025-06-03 09:59:26 - INFO - Entrenant el model amb els paràmetres especificats...
+2025-06-03 09:59:31 - INFO - Model guardat a: C:\Users\Usuario\Documents\Practica-3-IA\2-Models-Predictius\Absencies\decision_tree_absences.joblib

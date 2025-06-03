@@ -333,6 +333,9 @@ def main():
                         help="Directori on desar el model i resultats")
     parser.add_argument("--params", type=str, default=DEFAULT_PARAMS_PATH,
                         help="Ruta al fitxer JSON amb els paràmetres del model")
+    # Model type argument is kept for backward compatibility but will always use gradient_boosting
+    parser.add_argument("--model-type", type=str, default='gradient_boosting',
+                        help="Tipus de model (sempre serà gradient boosting)")
 
     args = parser.parse_args()
 

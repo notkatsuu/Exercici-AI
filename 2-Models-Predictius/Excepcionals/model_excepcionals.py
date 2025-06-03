@@ -126,6 +126,9 @@ def main():
     parser.add_argument("--data", default='../../portuguese_hs_students.csv')
     parser.add_argument("--output-dir", default=os.path.dirname(__file__))
     parser.add_argument("--params", default=DEFAULT_PARAMS_PATH)
+    # Model type argument is kept for backward compatibility but will always use gradient_boosting
+    parser.add_argument("--model-type", type=str, default='gradient_boosting',
+                        help="Tipus de model (sempre serà gradient boosting)")
     args = parser.parse_args()
     params = load_parameters(args.params)
     # Ensure threshold is integer

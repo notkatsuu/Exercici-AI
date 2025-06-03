@@ -133,6 +133,7 @@ class PredictorApp:
 
         # Variable per seguir el model actiu
         self.model_type = tk.StringVar(value="absencies")
+        self.model_algorithm = tk.StringVar(value="gradient_boosting") # Algoritme (decision_tree, random_forest, gradient_boosting)
 
         # Rutes als fitxers dels models (camins absoluts per evitar ambdiguïtats)
         self.model_paths = {
@@ -1077,5 +1078,4 @@ if __name__ == '__main__':
     root = tk.Tk()
     app = PredictorApp(root)
     root.mainloop()
-
 
