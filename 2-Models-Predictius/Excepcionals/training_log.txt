@@ -2,13 +2,15 @@ STDOUT:
 
 
 STDERR:
-2025-06-03 10:53:31 - INFO - Paràmetres carregats des de: C:\Users\Usuario\Documents\Practica-3-IA\2-Models-Predictius\Excepcionals\params_excepcionals.json
-2025-06-03 10:53:31 - INFO - Carregant dades des de: C:\Users\Usuario\Documents\Practica-3-IA\portuguese_hs_students.csv
-2025-06-03 10:53:31 - INFO - Analitzant distribució d'alumnes excepcionals (G3>=17)...
-2025-06-03 10:53:31 - INFO - Total alumnes: 649
-2025-06-03 10:53:31 - INFO - Excepcionals: 46 (7.09%)
-2025-06-03 10:53:31 - INFO - No excepcionals: 603 (92.91%)
-2025-06-03 10:53:39 - INFO - Accuracy: 0.9615
-2025-06-03 10:53:39 - INFO - Precision: 0.7857
-2025-06-03 10:53:39 - INFO - Recall: 0.8462
-2025-06-03 10:53:39 - INFO - F1: 0.8148
+2025-06-03 11:03:39 - INFO - Iniciant el procés d'entrenament del model d'alumnes excepcionals...
+2025-06-03 11:03:39 - INFO - Utilitzant llindar de 17 per determinar alumnes excepcionals
+2025-06-03 11:03:39 - INFO - Total d'alumnes: 649
+2025-06-03 11:03:39 - INFO - Alumnes excepcionals: 46 (7.09%)
+2025-06-03 11:03:39 - INFO - Alumnes no excepcionals: 603 (92.91%)
+2025-06-03 11:03:39 - INFO - Entrenant el model amb els paràmetres especificats...
+2025-06-03 11:03:47 - INFO - Rendiment del model:
+2025-06-03 11:03:47 - INFO - Exactitud (accuracy): 0.9615
+2025-06-03 11:03:47 - INFO - Precisió (precision): 0.7857
+2025-06-03 11:03:47 - INFO - Sensibilitat (recall): 0.8462
+2025-06-03 11:03:47 - INFO - Puntuació F1 (F1 score): 0.8148
+2025-06-03 11:03:47 - INFO - Model desat a C:\Users\Usuario\Documents\Practica-3-IA\2-Models-Predictius\Excepcionals\model_excepcional.joblib

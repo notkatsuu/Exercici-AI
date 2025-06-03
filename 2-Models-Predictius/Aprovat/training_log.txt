@@ -1,38 +1,12 @@
-2025-06-03 10:49:21,007 - INFO - Iniciant el procés d'entrenament del model de predicció d'aprovats...
-2025-06-03 10:49:21,007 - INFO - Fitxer de dades: ../../portuguese_hs_students.csv
-2025-06-03 10:49:21,007 - INFO - Directori de sortida: C:\Users\Usuario\Documents\Practica-3-IA\2-Models-Predictius\Aprovat
-2025-06-03 10:49:21,007 - INFO - Fitxer de paràmetres: C:\Users\Usuario\Documents\Practica-3-IA\2-Models-Predictius\Aprovat\params_aprovat.json
-2025-06-03 10:49:21,007 - INFO - Carregant dades des de: ../../portuguese_hs_students.csv
-2025-06-03 10:49:21,012 - INFO - Analitzant distribució de classes (aprovats/suspesos)...
-2025-06-03 10:49:21,014 - INFO - Total d'estudiants: 649
-2025-06-03 10:49:21,014 - INFO - Estudiants aprovats: 549 (84.59%)
-2025-06-03 10:49:21,014 - INFO - Estudiants suspesos: 100 (15.41%)
-2025-06-03 10:49:21,014 - INFO - Preparant dades per a l'entrenament del model...
-2025-06-03 10:49:21,015 - INFO - Dades preparades: 649 files, 32 columnes
-2025-06-03 10:49:21,015 - INFO - Característiques categòriques: ['school', 'sex', 'address', 'famsize', 'Pstatus', 'Mjob', 'Fjob', 'reason', 'guardian', 'schoolsup', 'famsup', 'paid', 'activities', 'nursery', 'higher', 'internet', 'romantic']
-2025-06-03 10:49:21,016 - INFO - Paràmetres carregats des de: C:\Users\Usuario\Documents\Practica-3-IA\2-Models-Predictius\Aprovat\params_aprovat.json
-2025-06-03 10:49:21,016 - INFO - Entrenant model de classificació...
-2025-06-03 10:49:21,016 - INFO - Creant pipeline de preprocessament...
-2025-06-03 10:49:21,017 - INFO - Conjunt d'entrenament: 519 mostres, Conjunt de test: 130 mostres
-2025-06-03 10:49:21,017 - INFO - Distribució de classes en entrenament: [ 85 434]
-2025-06-03 10:49:21,017 - INFO - Distribució de classes en test: [ 15 115]
-2025-06-03 10:49:21,017 - INFO - Paràmetre n_estimators establert a 1000
-2025-06-03 10:49:21,017 - INFO - Paràmetre learning_rate establert a 0.06
-2025-06-03 10:49:21,017 - INFO - Paràmetre max_depth establert a 13
-2025-06-03 10:49:21,017 - INFO - Paràmetre min_samples_leaf establert a 1
-2025-06-03 10:49:21,017 - INFO - Paràmetre subsample establert a 0.95
-2025-06-03 10:49:21,017 - INFO - Iniciant entrenament del model...
-2025-06-03 10:49:26,435 - INFO - Model entrenat correctament
-2025-06-03 10:49:26,446 - INFO - Rendiment del model:
-2025-06-03 10:49:26,446 - INFO - Exactitud (accuracy): 0.9154
-2025-06-03 10:49:26,446 - INFO - Precisió (precision): 0.9643
-2025-06-03 10:49:26,446 - INFO - Sensibilitat (recall): 0.9391
-2025-06-03 10:49:26,446 - INFO - Puntuació F1 (F1 score): 0.9515
-2025-06-03 10:49:26,447 - INFO - Matriu de confusió:
-2025-06-03 10:49:26,447 - INFO - Verdaders positius (TP): 108
-2025-06-03 10:49:26,447 - INFO - Falsos positius (FP): 4
-2025-06-03 10:49:26,448 - INFO - Verdaders negatius (TN): 11
-2025-06-03 10:49:26,448 - INFO - Falsos negatius (FN): 7
-2025-06-03 10:49:26,465 - INFO - Model desat a C:\Users\Usuario\Documents\Practica-3-IA\2-Models-Predictius\Aprovat\model_aprovat.joblib
-2025-06-03 10:49:26,827 - INFO - Corba de precisió-record desada a C:\Users\Usuario\Documents\Practica-3-IA\2-Models-Predictius\Aprovat\pr_curves.png
-2025-06-03 10:49:26,827 - INFO - Procés d'entrenament completat correctament.
+STDOUT:
+
+
+STDERR:
+2025-06-03 11:02:54 - INFO - Iniciant el procÃ©s d'entrenament del model de predicciÃ³ d'aprovats...
+2025-06-03 11:02:54 - INFO - Entrenant el model amb els parÃ metres especificats...
+2025-06-03 11:02:59 - INFO - Rendiment del model:
+2025-06-03 11:02:59 - INFO - Exactitud (accuracy): 0.9154
+2025-06-03 11:02:59 - INFO - PrecisiÃ³ (precision): 0.9643
+2025-06-03 11:02:59 - INFO - Sensibilitat (recall): 0.9391
+2025-06-03 11:02:59 - INFO - PuntuaciÃ³ F1 (F1 score): 0.9515
+2025-06-03 11:02:59 - INFO - Model desat a C:\Users\Usuario\Documents\Practica-3-IA\2-Models-Predictius\Aprovat\model_aprovat.joblib
