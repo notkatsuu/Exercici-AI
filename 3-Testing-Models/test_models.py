@@ -137,10 +137,10 @@ class PredictorApp:
 
         # Rutes als fitxers dels models (camins absoluts per evitar ambdiguïtats)
         self.model_paths = {
-            "absencies": os.path.abspath("../2-Models-Predictius/Absencies/decision_tree_absences.joblib"),
-            "aprovat": os.path.abspath("../2-Models-Predictius/Aprovat/decision_tree_aprovat.joblib")
+            "absencies": os.path.abspath("../2-Models-Predictius/Absencies/model_absences.joblib"),
+            "aprovat": os.path.abspath("../2-Models-Predictius/Aprovat/model_aprovat.joblib"),
+            "excepcionals": os.path.abspath("../2-Models-Predictius/Excepcionals/model_excepcional.joblib")
         }
-        self.model_paths["excepcionals"] = os.path.abspath("../2-Models-Predictius/Excepcionals/decision_tree_excepcionals.joblib")
 
         self.params_paths = {
             "absencies": os.path.abspath("../2-Models-Predictius/Absencies/params_absencies.json"),

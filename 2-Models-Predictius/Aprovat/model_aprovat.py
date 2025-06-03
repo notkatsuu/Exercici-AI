@@ -271,7 +271,7 @@ def train_model(X: pd.DataFrame, y: pd.Series, categorical_features: List[str], 
     logger.info(f"Falsos negatius (FN): {fn}")
 
     # Desar el model
-    model_path = os.path.join(output_dir, "decision_tree_aprovat.joblib")
+    model_path = os.path.join(output_dir, "model_aprovat.joblib")
     joblib.dump(smote_pipeline, model_path)
     logger.info(f"Model desat a {model_path}")
 

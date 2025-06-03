@@ -2,13 +2,13 @@ STDOUT:
 
 
 STDERR:
-2025-05-30 17:23:01 - INFO - Paràmetres carregats des de: C:\Users\Usuario\Documents\Practica-3-IA\2-Models-Predictius\Excepcionals\params_excepcionals.json
-2025-05-30 17:23:01 - INFO - Carregant dades des de: C:\Users\Usuario\Documents\Practica-3-IA\portuguese_hs_students.csv
-2025-05-30 17:23:01 - INFO - Analitzant distribució d'alumnes excepcionals (G3>=17)...
-2025-05-30 17:23:01 - INFO - Total alumnes: 649
-2025-05-30 17:23:01 - INFO - Excepcionals: 46 (7.09%)
-2025-05-30 17:23:01 - INFO - No excepcionals: 603 (92.91%)
-2025-05-30 17:23:09 - INFO - Accuracy: 0.9615
-2025-05-30 17:23:09 - INFO - Precision: 0.7857
-2025-05-30 17:23:09 - INFO - Recall: 0.8462
-2025-05-30 17:23:09 - INFO - F1: 0.8148
+2025-06-03 10:53:31 - INFO - Paràmetres carregats des de: C:\Users\Usuario\Documents\Practica-3-IA\2-Models-Predictius\Excepcionals\params_excepcionals.json
+2025-06-03 10:53:31 - INFO - Carregant dades des de: C:\Users\Usuario\Documents\Practica-3-IA\portuguese_hs_students.csv
+2025-06-03 10:53:31 - INFO - Analitzant distribució d'alumnes excepcionals (G3>=17)...
+2025-06-03 10:53:31 - INFO - Total alumnes: 649
+2025-06-03 10:53:31 - INFO - Excepcionals: 46 (7.09%)
+2025-06-03 10:53:31 - INFO - No excepcionals: 603 (92.91%)
+2025-06-03 10:53:39 - INFO - Accuracy: 0.9615
+2025-06-03 10:53:39 - INFO - Precision: 0.7857
+2025-06-03 10:53:39 - INFO - Recall: 0.8462
+2025-06-03 10:53:39 - INFO - F1: 0.8148

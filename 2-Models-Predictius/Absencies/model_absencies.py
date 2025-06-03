@@ -39,45 +39,19 @@ DEFAULT_PARAMS_PATH = os.path.join(os.path.dirname(__file__), "params_absencies.
 
 
 def load_data(file_path: str) -> pd.DataFrame:
-    try:
-        return pd.read_csv(file_path)
-    except FileNotFoundError:
-        logger.error(f"El fitxer de dades no s'ha trobat a: {file_path}")
-        raise
-    except Exception as e:
-        logger.error(f"S'ha produït un error carregant les dades: {e}")
-        raise
+    return pd.read_csv(file_path)
+    
 
 
 def load_parameters(params_path: str) -> Dict[str, Any]:
-    default_params = {
-        "regressor__n_estimators": 100,
-        "regressor__learning_rate": 0.05,
-        "regressor__max_depth": 6,
-        "regressor__min_samples_leaf": 5,
-        "regressor__subsample": 0.8
-    }
-    try:
-        with open(params_path, 'r') as f:
-            params = json.load(f)
-            return params
-    except FileNotFoundError:
-        logger.warning(f"No s'ha trobat el fitxer de paràmetres: {params_path}. S'utilitzaran paràmetres per defecte.")
-        return default_params
-    except json.JSONDecodeError:
-        logger.error(f"Error de format al fitxer de paràmetres: {params_path}. S'utilitzaran paràmetres per defecte.")
-        return default_params
-    except Exception as e:
-        logger.error(f"S'ha produït un error carregant els paràmetres: {e}. S'utilitzaran paràmetres per defecte.")
-        return default_params
+    with open(params_path, 'r') as f:
+        params = json.load(f)
+        return params
 
 
 
 def prepare_pipeline(numerical_features: List[str],
                      categorical_features: List[str]) -> ColumnTransformer:
-
-    logger.info("Preparant pipeline de preprocessament avançat")
-
     numerical_transformer = Pipeline(steps=[
         ('imputer', SimpleImputer(strategy='median')),
         ('scaler', StandardScaler())
@@ -129,7 +103,7 @@ def train_regression_model(X: pd.DataFrame, y: pd.Series,
 
 
 def save_model_and_params(model: Pipeline, params: Dict[str, Any],
-                          output_dir: str, model_filename: str = "decision_tree_absences.joblib",
+                          output_dir: str, model_filename: str = "model_absences.joblib",
                           params_filename: str = "params_absencies.json") -> None:
 
     os.makedirs(output_dir, exist_ok=True) # Ensure output directory exists
@@ -167,7 +141,7 @@ def main() -> None:
     )
     parser.add_argument('--data', type=str, default='../../portuguese_hs_students.csv',
                         help='Ruta al fitxer CSV amb les dades dels estudiants.')
-    parser.add_argument('--output-dir', type=str, default=os.path.join(os.path.dirname(__file__), 'output_model'),
+    parser.add_argument('--output-dir', type=str, default=os.path.dirname(__file__),
                         help="Directori on es guardaran el model entrenat i els paràmetres.")
     parser.add_argument('--model-type', type=str,
                         choices=['gradient_boosting'],

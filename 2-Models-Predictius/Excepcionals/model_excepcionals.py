@@ -118,7 +118,7 @@ def train_and_evaluate(X: pd.DataFrame, y: pd.Series, categorical: List[str], pa
     logger.info(f"F1: {f1_score(y_test,y_pred):.4f}")
     # save model
     os.makedirs(output_dir, exist_ok=True)
-    joblib.dump(pipeline, os.path.join(output_dir,'decision_tree_excepcionals.joblib'))
+    joblib.dump(pipeline, os.path.join(output_dir,'model_excepcional.joblib'))
 
 
 def main():

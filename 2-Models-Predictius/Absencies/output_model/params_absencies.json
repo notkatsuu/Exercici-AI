@@ -1,0 +1,6 @@
+{
+    "regressor__n_estimators": 10000,
+    "regressor__learning_rate": 0.06,
+    "regressor__max_depth": 13,
+    "regressor__subsample": 0.95
+}
