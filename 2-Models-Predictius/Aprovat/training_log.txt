@@ -2,11 +2,3 @@ STDOUT:
 
 
 STDERR:
-2025-06-03 11:02:54 - INFO - Iniciant el procés d'entrenament del model de predicció d'aprovats...
-2025-06-03 11:02:54 - INFO - Entrenant el model amb els paràmetres especificats...
-2025-06-03 11:02:59 - INFO - Rendiment del model:
-2025-06-03 11:02:59 - INFO - Exactitud (accuracy): 0.9154
-2025-06-03 11:02:59 - INFO - Precisió (precision): 0.9643
-2025-06-03 11:02:59 - INFO - Sensibilitat (recall): 0.9391
-2025-06-03 11:02:59 - INFO - Puntuació F1 (F1 score): 0.9515
-2025-06-03 11:02:59 - INFO - Model desat a C:\Users\Usuario\Documents\Practica-3-IA\2-Models-Predictius\Aprovat\model_aprovat.joblib

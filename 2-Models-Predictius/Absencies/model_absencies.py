@@ -40,7 +40,7 @@ DEFAULT_PARAMS_PATH = os.path.join(os.path.dirname(__file__), "params_absencies.
 
 def load_data(file_path: str) -> pd.DataFrame:
     return pd.read_csv(file_path)
-    
+
 
 
 def load_parameters(params_path: str) -> Dict[str, Any]:
@@ -77,7 +77,7 @@ def train_regression_model(X: pd.DataFrame, y: pd.Series,
                            preprocessor: ColumnTransformer,
                            param_file: str = DEFAULT_PARAMS_PATH) -> Tuple[Pipeline, Dict[str, Any]]:
 
- 
+
     model_params = load_parameters(param_file)
     regressor_params = {k.replace('regressor__', ''): v
                         for k, v in model_params.items() if k.startswith('regressor__')}
@@ -95,7 +95,6 @@ def train_regression_model(X: pd.DataFrame, y: pd.Series,
         ('regressor', regressor)
     ])
 
-    logger.info("Entrenant el model amb els paràmetres especificats...")
     model.fit(X, y)
 
     return model, model_params
@@ -109,26 +108,22 @@ def save_model_and_params(model: Pipeline, params: Dict[str, Any],
     os.makedirs(output_dir, exist_ok=True) # Ensure output directory exists
     model_path = os.path.join(output_dir, model_filename)
     joblib.dump(model, model_path)
-    logger.info(f"Model guardat a: {model_path}")
 
     params_path = os.path.join(output_dir, params_filename)
-    try:
-        with open(params_path, 'w') as f:
-            json.dump(params, f, indent=4) # Improved formatting with indent=4
-    except Exception as e:
-        logger.error(f"No s'han pogut guardar els paràmetres a {params_path}: {e}")
+
+    with open(params_path, 'w') as f:
+        json.dump(params, f, indent=4) # Improved formatting with indent=4
+
 
 
 def define_feature_types(data: pd.DataFrame, target_column: str = 'absences') -> Tuple[List[str], List[str]]:
-    if target_column not in data.columns:
-        logger.error(f"La columna objectiu '{target_column}' no existeix a les dades.")
-        raise ValueError(f"La columna objectiu '{target_column}' no existeix a les dades.")
+
 
     numerical_cols = data.select_dtypes(include=np.number).columns.tolist()
     numerical_cols = [col for col in numerical_cols if col != target_column]
 
     categorical_cols = data.select_dtypes(include=['object', 'category']).columns.tolist()
- 
+
     categorical_cols = [col for col in categorical_cols if col != target_column]
 
     return numerical_cols, categorical_cols
@@ -153,38 +148,26 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    try:
-        data = load_data(args.data)
-      
-        numerical_cols, categorical_cols = define_feature_types(data, target_column='absences')
-
-        if not numerical_cols and not categorical_cols:
-            logger.error("No s'han trobat característiques per entrenar el model. Revisa les dades.")
-            return
-
-        preprocessor = prepare_pipeline(numerical_cols, categorical_cols)
-
-        X = data.drop(columns=['absences'])
-        y = data['absences']
-
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=0.2, random_state=RANDOM_STATE, stratify=pd.cut(y, bins=5, labels=False, include_lowest=True) if y.nunique() > 5 else None
-        )
     
-        model, used_params = train_regression_model(
-            X_train, y_train, preprocessor, param_file=args.params
-        )
+    data = load_data(args.data)
 
-        save_model_and_params(model, used_params, args.output_dir)
+    numerical_cols, categorical_cols = define_feature_types(data, target_column='absences')
 
 
-    except FileNotFoundError:
-        logger.error(f"Error: El fitxer de dades no s'ha trobat a la ruta especificada: {args.data}")
-    except ValueError as ve:
-        logger.error(f"Error de valor durant l'execució: {ve}")
-    except Exception as e:
-        logger.error(f"S'ha produït un error inesperat durant l'execució: {e}", exc_info=True)
-        # exc_info=True in logger.error will print traceback for unexpected errors.
+    preprocessor = prepare_pipeline(numerical_cols, categorical_cols)
+
+    X = data.drop(columns=['absences'])
+    y = data['absences']
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=RANDOM_STATE, stratify=pd.cut(y, bins=5, labels=False, include_lowest=True) if y.nunique() > 5 else None
+    )
+    
+    model, used_params = train_regression_model(
+        X_train, y_train, preprocessor, param_file=args.params
+    )
+
+    save_model_and_params(model, used_params, args.output_dir)
+
 
 
 if __name__ == "__main__":

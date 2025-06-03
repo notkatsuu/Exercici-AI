@@ -2,5 +2,3 @@ STDOUT:
 
 
 STDERR:
-2025-06-03 11:02:40 - INFO - Entrenant el model amb els paràmetres especificats...
-2025-06-03 11:02:46 - INFO - Model guardat a: C:\Users\Usuario\Documents\Practica-3-IA\2-Models-Predictius\Absencies\model_absences.joblib

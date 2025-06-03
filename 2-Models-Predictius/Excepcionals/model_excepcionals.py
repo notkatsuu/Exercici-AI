@@ -55,11 +55,11 @@ def load_parameters(params_path: str) -> Dict[str, Any]:
 def prepare_data(data: pd.DataFrame, threshold: int) -> Tuple[pd.DataFrame, pd.Series, List[str]]:
     """
     Prepara les dades per a l'entrenament del model d'alumnes excepcionals.
-    
+
     Args:
         data: DataFrame amb les dades
         threshold: Llindar a partir del qual es considera un alumne excepcional
-        
+
     Returns:
         X: Característiques
         y: Variable objectiu (excepcional/no excepcional)
@@ -67,14 +67,14 @@ def prepare_data(data: pd.DataFrame, threshold: int) -> Tuple[pd.DataFrame, pd.S
     """
     # Crear la variable objectiu: excepcional (1) / no excepcional (0)
     data['excepcional'] = (data['G3'] >= threshold).astype(int)
-    
+
     # No utilitzar G3 com a característica
     X = data.drop(columns=['excepcional', 'G3'])
     y = data['excepcional']
-    
+
     # Identificar característiques categòriques
     categorical_features = X.select_dtypes(include=['object', 'category']).columns.tolist()
-    
+
     return X, y, categorical_features
 
 
@@ -101,25 +101,25 @@ def prepare_pipeline(numerical_features: List[str], categorical_features: List[s
     return preprocessor
 
 
-def train_classification_model(X: pd.DataFrame, y: pd.Series, 
+def train_classification_model(X: pd.DataFrame, y: pd.Series,
                                categorical_features: List[str],
                                param_file: str = DEFAULT_PARAMS_PATH) -> Tuple[ImbPipeline, Dict[str, Any]]:
     """
     Entrena el model de classificació per predir alumnes excepcionals.
-    
+
     Args:
         X: DataFrame amb les característiques
         y: Series amb la variable objectiu
         categorical_features: Llista de característiques categòriques
         param_file: Ruta al fitxer de paràmetres
-        
+
     Returns:
         model: Model entrenat
         model_params: Paràmetres utilitzats
     """
     # Identificar les característiques numèriques
     numerical_features = [col for col in X.columns if col not in categorical_features]
-    
+
     # Crear el preprocessador
     preprocessor = prepare_pipeline(numerical_features, categorical_features)
     
@@ -137,7 +137,7 @@ def train_classification_model(X: pd.DataFrame, y: pd.Series,
     
     logger.info("Entrenant el model amb els paràmetres especificats...")
     model.fit(X, y)
-    
+
     return model, model_params
 
 
@@ -168,11 +168,11 @@ def main():
 
     try:
         logger.info("Iniciant el procés d'entrenament del model d'alumnes excepcionals...")
-        
+
         # Carregar dades i paràmetres
         data = load_data(args.data)
         params = load_parameters(args.params)
-        
+
         # Determinar el llindar per alumnes excepcionals
         raw_threshold = params.get('threshold', 18)
         try:
@@ -181,49 +181,49 @@ def main():
         except (TypeError, ValueError):
             logger.warning(f"Valor de llindar invàlid '{raw_threshold}', utilitzant 18 per defecte")
             threshold = 18
-        
+
         logger.info(f"Utilitzant llindar de {threshold} per determinar alumnes excepcionals")
-        
+
         # Preparar dades
         X, y, categorical_features = prepare_data(data, threshold)
-        
+
         # Mostrar distribució de classes
         class_counts = y.value_counts()
         total = len(y)
         logger.info(f"Total d'alumnes: {total}")
         logger.info(f"Alumnes excepcionals: {class_counts.get(1, 0)} ({class_counts.get(1, 0)/total*100:.2f}%)")
         logger.info(f"Alumnes no excepcionals: {class_counts.get(0, 0)} ({class_counts.get(0, 0)/total*100:.2f}%)")
-        
+
         # Dividir dades en conjunts d'entrenament i test
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=0.2, random_state=RANDOM_STATE
         )
-        
+
         # Entrenar model
         model, _ = train_classification_model(
             X_train, y_train, categorical_features, args.params
         )
-        
+
         # Avaluar el model
         y_pred = model.predict(X_test)
-        
+
         # Calcular mètriques
         accuracy = accuracy_score(y_test, y_pred)
         precision = precision_score(y_test, y_pred)
         recall = recall_score(y_test, y_pred)
         f1 = f1_score(y_test, y_pred)
-        
+
         logger.info(f"Rendiment del model:")
         logger.info(f"Exactitud (accuracy): {accuracy:.4f}")
         logger.info(f"Precisió (precision): {precision:.4f}")
         logger.info(f"Sensibilitat (recall): {recall:.4f}")
         logger.info(f"Puntuació F1 (F1 score): {f1:.4f}")
-        
+
         # Desar el model
         model_path = os.path.join(args.output_dir, "model_excepcional.joblib")
         joblib.dump(model, model_path)
         logger.info(f"Model desat a {model_path}")
-        
+
     except Exception as e:
         logger.exception(f"Error durant l'execució: {e}")
         with open(os.path.join(args.output_dir, "error_log.txt"), "w") as f:
