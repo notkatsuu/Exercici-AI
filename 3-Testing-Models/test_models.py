@@ -1047,6 +1047,29 @@ class PredictorApp:
 
             if model_type == "absencies":
                 result_text = f"El model prediu aproximadament {prediction[0]:.2f} absències escolars al llarg d'un trimestre.\n"
+            elif model_type == "excepcionals":
+                # Obtenir la probabilitat de ser excepcional de forma gradual
+                if hasattr(self.model, "predict_proba"):
+                    probabilities = self.model.predict_proba(df_to_predict)
+                    prob_excepcional = probabilities[0][1] * 100
+                    
+                    # Mostrar un resultat gradual/lineal
+                    if prob_excepcional > 75:
+                        nivell = "MOLT ALT"
+                    elif prob_excepcional > 50:
+                        nivell = "ALT"
+                    elif prob_excepcional > 25:
+                        nivell = "MODERAT"
+                    else:
+                        nivell = "BAIX"
+                        
+                    result_text = f"El model prediu una probabilitat del {prob_excepcional:.2f}% que l'estudiant sigui EXCEPCIONAL.\n"
+                    result_text += f"Nivell d'excel·lència potencial: {nivell}\n"
+                else:
+                    if prediction[0] == 1:
+                        result_text = "El model prediu que l'estudiant serà EXCEPCIONAL.\n"
+                    else:
+                        result_text = "El model prediu que l'estudiant NO serà EXCEPCIONAL.\n"
             else:
                 # Obtenir la probabilitat d'aprovar (només per al model d'aprovats)
                 if hasattr(self.model, "predict_proba"):
