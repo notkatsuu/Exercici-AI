@@ -117,8 +117,5 @@ Els models entrenats mostren capacitat predictiva significativa, especialment:
 
 ## 👥 Autors
 
-[Nom de l'autor/a]
-
-## 📄 Llicència
-
-Aquest projecte està disponible sota [especificar llicència].
+- Notkatsuu
+- ShadowLoker
