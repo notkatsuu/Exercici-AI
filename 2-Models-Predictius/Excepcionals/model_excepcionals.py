@@ -1,11 +1,29 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Model de predicció d'alumnes excepcionals
-=========================================
-Aquest script implementa un model de classificació per predir si un alumne és excepcional
-(G3>=18) utilitzant algoritmes de machine learning i tractament per a dades desbalancejades.
-Els paràmetres del model es llegeixen des d'un fitxer JSON.
+# MODEL DE PREDICCIÓ D'ALUMNES EXCEPCIONALS
+# -----------------------------------------
+# Aquest script entrena un model de classificació binària per identificar alumnes excepcionals 
+# (estudiants amb notes molt altes, G3 >= threshold, normalment 18).
+#
+# LLIBRERIES PRINCIPALS:
+# - sklearn: Per a preprocessament de dades, models de classificació i mètriques d'avaluació
+# - imblearn: Per a gestionar el desequilibri de classes amb tècniques de sobremostreig (SMOTE)
+# - pandas: Per a manipulació i anàlisi de dades
+# - joblib: Per desar el model entrenat
+#
+# ESTRUCTURA (PSEUDOCODI):
+# 1. Càrrega de dades dels estudiants des d'un CSV
+# 2. Creació de variable objectiu binària (excepcional/no-excepcional) segons el llindar configurat
+# 3. Preprocessament:
+#    - Separació de característiques numèriques i categòriques
+#    - Imputació de valors nuls 
+#    - Escalat de variables numèriques
+#    - Codificació one-hot de variables categòriques
+# 4. Sobremostreig amb SMOTE per abordar el fort desequilibri de classes (pocs alumnes excepcionals)
+# 5. Entrenament d'un model GradientBoostingClassifier amb hiperparàmetres carregats d'un JSON
+# 6. Avaluació del model amb mètriques (exactitud, precisió, sensibilitat, F1)
+# 7. Desament del model entrenat
+#
+# EXECUCIÓ: python model_excepcionals.py --data [ruta_dades] --output-dir [directori_sortida] --params [ruta_params]
 """
 
 import argparse
@@ -27,7 +45,11 @@ from sklearn.pipeline import Pipeline
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline as ImbPipeline
 
-# Configuració del logger
+# -----------------------
+# CONFIGURACIÓ GENERAL
+# -----------------------
+
+# Configuració del logger per registrar informació de l'execució
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -35,118 +57,101 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Constants
+# Constants globals
 RANDOM_STATE = 42
 DEFAULT_PARAMS_PATH = os.path.join(os.path.dirname(__file__), "params_excepcionals.json")
 
+# -----------------------
+# FUNCIONS DE SUPORT
+# -----------------------
 
+# Carrega les dades des d'un fitxer CSV
 def load_data(file_path: str) -> pd.DataFrame:
-    """Carrega les dades des d'un fitxer CSV."""
     return pd.read_csv(file_path)
 
-
+# Carrega els paràmetres del model des d'un fitxer JSON
 def load_parameters(params_path: str) -> Dict[str, Any]:
-    """Carrega els paràmetres del model des d'un fitxer JSON."""
     with open(params_path, 'r') as f:
-        params = json.load(f)
-        return params
+        return json.load(f)
 
-
+# Prepara les dades per a la classificació d'alumnes excepcionals
 def prepare_data(data: pd.DataFrame, threshold: int) -> Tuple[pd.DataFrame, pd.Series, List[str]]:
-    """
-    Prepara les dades per a l'entrenament del model d'alumnes excepcionals.
-
-    Args:
-        data: DataFrame amb les dades
-        threshold: Llindar a partir del qual es considera un alumne excepcional
-
-    Returns:
-        X: Característiques
-        y: Variable objectiu (excepcional/no excepcional)
-        categorical_features: Llista de característiques categòriques
-    """
-    # Crear la variable objectiu: excepcional (1) / no excepcional (0)
+    # Es defineix la variable objectiu binària: 1 si G3 >= threshold, 0 si no
     data['excepcional'] = (data['G3'] >= threshold).astype(int)
 
-    # No utilitzar G3 com a característica
+    # S'elimina G3 per evitar redundància amb la variable objectiu
     X = data.drop(columns=['excepcional', 'G3'])
     y = data['excepcional']
 
-    # Identificar característiques categòriques
+    # S'identifiquen les columnes categòriques
     categorical_features = X.select_dtypes(include=['object', 'category']).columns.tolist()
 
     return X, y, categorical_features
 
-
+# Prepara el pipeline de preprocessament per a les dades
 def prepare_pipeline(numerical_features: List[str], categorical_features: List[str]) -> ColumnTransformer:
-    """Crea un pipeline de preprocessament per a les dades."""
+    # Tractament de columnes numèriques
     numerical_transformer = Pipeline(steps=[
         ('imputer', SimpleImputer(strategy='median')),
         ('scaler', StandardScaler())
     ])
 
+    # Tractament de columnes categòriques
     categorical_transformer = Pipeline(steps=[
         ('imputer', SimpleImputer(strategy='most_frequent')),
         ('onehot', OneHotEncoder(handle_unknown='ignore', sparse_output=False))
     ])
 
-    preprocessor = ColumnTransformer(
+    # ColumnTransformer que aplica el processament corresponent a cada tipus de columna
+    return ColumnTransformer(
         transformers=[
             ('num', numerical_transformer, numerical_features),
             ('cat', categorical_transformer, categorical_features)
         ],
-        remainder='passthrough'
+        remainder='passthrough'  # Manté columnes no especificades
     )
 
-    return preprocessor
-
-
+# Entrena el model de classificació utilitzant Gradient Boosting i SMOTE
 def train_classification_model(X: pd.DataFrame, y: pd.Series,
                                categorical_features: List[str],
                                param_file: str = DEFAULT_PARAMS_PATH) -> Tuple[ImbPipeline, Dict[str, Any]]:
-    """
-    Entrena el model de classificació per predir alumnes excepcionals.
 
-    Args:
-        X: DataFrame amb les característiques
-        y: Series amb la variable objectiu
-        categorical_features: Llista de característiques categòriques
-        param_file: Ruta al fitxer de paràmetres
-
-    Returns:
-        model: Model entrenat
-        model_params: Paràmetres utilitzats
-    """
-    # Identificar les característiques numèriques
+    # Determina columnes numèriques per exclusió de les categòriques
     numerical_features = [col for col in X.columns if col not in categorical_features]
 
-    # Crear el preprocessador
+    # Crea el pipeline de preprocessament
     preprocessor = prepare_pipeline(numerical_features, categorical_features)
-    
-    # Carregar paràmetres del model
+
+    # Carrega els paràmetres del model des del fitxer
     model_params = load_parameters(param_file)
-    classifier_params = {k.replace('classifier__', ''): v
-                        for k, v in model_params.items() if k.startswith('classifier__')}
-    
-    # Crear pipeline amb SMOTE per gestionar el desbalanceig
+    classifier_params = {
+        k.replace('classifier__', ''): v
+        for k, v in model_params.items() if k.startswith('classifier__')
+    }
+
+    # Pipeline complet: preprocessat + sobremostreig + model de classificació
     model = ImbPipeline(steps=[
         ('preprocessor', preprocessor),
         ('smote', SMOTE(random_state=RANDOM_STATE)),
         ('classifier', GradientBoostingClassifier(random_state=RANDOM_STATE, **classifier_params))
     ])
-    
+
+    # Entrenament
     logger.info("Entrenant el model amb els paràmetres especificats...")
     model.fit(X, y)
-
     return model, model_params
 
+# -----------------------
+# FUNCIÓ PRINCIPAL
+# -----------------------
 
 def main():
-    """Funció principal per entrenar i avaluar el model d'alumnes excepcionals."""
     parser = argparse.ArgumentParser(
         description="Entrena un model de predicció d'alumnes excepcionals",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
+
+    # Arguments CLI
     parser.add_argument("--data", type=str, default='../../portuguese_hs_students.csv',
                         help="Ruta al fitxer CSV amb les dades")
     parser.add_argument("--output-dir", type=str, default=os.path.dirname(__file__),
@@ -154,14 +159,14 @@ def main():
     parser.add_argument("--params", type=str, default=DEFAULT_PARAMS_PATH,
                         help="Ruta al fitxer JSON amb els paràmetres del model")
     parser.add_argument("--model-type", type=str, default='gradient_boosting',
-                        help="Tipus de model (sempre serà gradient boosting)")
+                        help="Tipus de model (actualment només s'accepta gradient boosting)")
 
     args = parser.parse_args()
 
-    # Assegurar-se que el directori de sortida existeix
+    # Crea el directori de sortida si no existeix
     os.makedirs(args.output_dir, exist_ok=True)
 
-    # Configura un gestor de logs addicional per desar els logs en un fitxer
+    # Logger també en fitxer
     file_handler = logging.FileHandler(os.path.join(args.output_dir, "training_log.txt"), mode='w')
     file_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
     logger.addHandler(file_handler)
@@ -169,45 +174,45 @@ def main():
     try:
         logger.info("Iniciant el procés d'entrenament del model d'alumnes excepcionals...")
 
-        # Carregar dades i paràmetres
+        # Carreguem dades i paràmetres
         data = load_data(args.data)
         params = load_parameters(args.params)
 
-        # Determinar el llindar per alumnes excepcionals
+        # Llindar per definir què és un alumne excepcional
         raw_threshold = params.get('threshold', 18)
         try:
             threshold = int(raw_threshold)
-            threshold = min(threshold, 18)  # Assegurar-se que no sigui superior a 18
+            threshold = min(threshold, 18)  # No té sentit superar 18
         except (TypeError, ValueError):
             logger.warning(f"Valor de llindar invàlid '{raw_threshold}', utilitzant 18 per defecte")
             threshold = 18
 
         logger.info(f"Utilitzant llindar de {threshold} per determinar alumnes excepcionals")
 
-        # Preparar dades
+        # Prepara les dades
         X, y, categorical_features = prepare_data(data, threshold)
 
-        # Mostrar distribució de classes
+        # Mostra la distribució de classes
         class_counts = y.value_counts()
         total = len(y)
         logger.info(f"Total d'alumnes: {total}")
         logger.info(f"Alumnes excepcionals: {class_counts.get(1, 0)} ({class_counts.get(1, 0)/total*100:.2f}%)")
         logger.info(f"Alumnes no excepcionals: {class_counts.get(0, 0)} ({class_counts.get(0, 0)/total*100:.2f}%)")
 
-        # Dividir dades en conjunts d'entrenament i test
+        # Separació train/test
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=0.2, random_state=RANDOM_STATE
         )
 
-        # Entrenar model
+        # Entrenament del model
         model, _ = train_classification_model(
             X_train, y_train, categorical_features, args.params
         )
 
-        # Avaluar el model
+        # Prediccions sobre el conjunt de test
         y_pred = model.predict(X_test)
 
-        # Calcular mètriques
+        # Mètriques de rendiment
         accuracy = accuracy_score(y_test, y_pred)
         precision = precision_score(y_test, y_pred)
         recall = recall_score(y_test, y_pred)
@@ -219,7 +224,7 @@ def main():
         logger.info(f"Sensibilitat (recall): {recall:.4f}")
         logger.info(f"Puntuació F1 (F1 score): {f1:.4f}")
 
-        # Desar el model
+        # Desa el model entrenat
         model_path = os.path.join(args.output_dir, "model_excepcional.joblib")
         joblib.dump(model, model_path)
         logger.info(f"Model desat a {model_path}")
@@ -229,7 +234,6 @@ def main():
         with open(os.path.join(args.output_dir, "error_log.txt"), "w") as f:
             f.write(f"Error: {str(e)}")
         raise
-
 
 if __name__ == "__main__":
     main()
